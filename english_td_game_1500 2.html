@@ -1,0 +1,1845 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Word Guard">
+<meta name="theme-color" content="#0b0e17">
+<meta name="format-detection" content="telephone=no">
+<title>英検タワーディフェンス - Word Guard</title>
+<style>
+  :root {
+    --bg: #0b0e17;
+    --bg2: #12162a;
+    --card: #1a1f35;
+    --accent: #00e5ff;
+    --accent2: #ff2d95;
+    --gold: #ffd700;
+    --text: #e8ecf5;
+    --muted: #8b93b0;
+    --success: #00e676;
+    --danger: #ff5252;
+    --sr: #a855f7;
+    --ssr: #f59e0b;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    height: 100%;
+    height: 100dvh;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Noto Sans JP", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+  }
+  body {
+    padding-top: var(--safe-top);
+    padding-bottom: var(--safe-bottom);
+  }
+  .screen {
+    display: none;
+    flex-direction: column;
+    height: 100%;
+    height: 100dvh;
+    padding: 12px 14px;
+    padding-top: calc(12px + var(--safe-top));
+    padding-bottom: calc(12px + var(--safe-bottom));
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .screen.active { display: flex; }
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+    flex-shrink: 0;
+    gap: 8px;
+  }
+  .logo {
+    font-size: 1.25rem;
+    font-weight: 800;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .stats {
+    display: flex;
+    gap: 8px;
+    font-size: 0.9rem;
+    align-items: center;
+  }
+  .stat {
+    background: var(--card);
+    padding: 6px 11px;
+    border-radius: 20px;
+    border: 1px solid #2a3150;
+    white-space: nowrap;
+  }
+  .stat span { color: var(--gold); font-weight: 700; }
+
+  .btn {
+    background: linear-gradient(135deg, #1e90ff, #00bfff);
+    border: none;
+    color: white;
+    padding: 14px 20px;
+    min-height: 48px;
+    border-radius: 14px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.12s, opacity 0.12s;
+    box-shadow: 0 4px 14px rgba(0,191,255,0.3);
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .btn:active { transform: scale(0.96); opacity: 0.9; }
+  .btn-pink {
+    background: linear-gradient(135deg, #ff2d95, #ff6b9d);
+    box-shadow: 0 4px 14px rgba(255,45,149,0.35);
+  }
+  .btn-gold {
+    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+    box-shadow: 0 4px 14px rgba(245,158,11,0.35);
+    color: #1a1a1a;
+  }
+  .btn-outline {
+    background: transparent;
+    border: 2px solid var(--accent);
+    color: var(--accent);
+    box-shadow: none;
+  }
+  .btn-sm {
+    padding: 10px 14px;
+    min-height: 40px;
+    font-size: 0.88rem;
+  }
+  .btn:disabled { opacity: 0.45; pointer-events: none; }
+
+  select {
+    background: var(--card);
+    color: var(--text);
+    border: 1px solid #2a3150;
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-size: 1rem;
+    width: 100%;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%238b93b0' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+  }
+
+  /* MENU */
+  #menu .hero {
+    text-align: center;
+    margin: 20px 0 28px;
+    flex-shrink: 0;
+  }
+  #menu .hero h1 {
+    font-size: 1.7rem;
+    margin-bottom: 6px;
+    background: linear-gradient(90deg, var(--accent), #a78bfa, var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  #menu .hero p { color: var(--muted); font-size: 0.9rem; }
+  .level-box {
+    background: var(--card);
+    padding: 14px;
+    border-radius: 14px;
+    border: 1px solid #2a3150;
+    margin-bottom: 18px;
+    flex-shrink: 0;
+  }
+  .level-box label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--muted);
+    font-size: 0.88rem;
+  }
+  .menu-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+  .menu-grid .btn {
+    width: 100%;
+    padding: 16px 12px;
+    font-size: 0.98rem;
+  }
+
+  /* BATTLE */
+  #battle {
+    overflow: hidden;
+    padding-bottom: calc(8px + var(--safe-bottom));
+  }
+  .battle-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    flex-shrink: 0;
+  }
+  .field {
+    position: relative;
+    height: 160px;
+    flex-shrink: 0;
+    background: linear-gradient(180deg, #0d1220, #151b30);
+    border-radius: 14px;
+    border: 1px solid #2a3150;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+  @media (min-height: 700px) {
+    .field { height: 200px; }
+  }
+  .base {
+    position: absolute;
+    left: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 48px;
+    height: 48px;
+    background: var(--card);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    border: 2px solid var(--accent);
+    z-index: 5;
+  }
+  .base-hp {
+    position: absolute;
+    left: 6px;
+    bottom: 6px;
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+  .enemy {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.45rem;
+    background: #2a1a30;
+    border: 2px solid var(--danger);
+    transition: left 0.05s linear;
+    z-index: 3;
+  }
+  .enemy .ehp {
+    position: absolute;
+    bottom: -13px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.62rem;
+    white-space: nowrap;
+    color: #ff8a80;
+  }
+  .combo-display {
+    text-align: center;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--accent2);
+    min-height: 26px;
+    margin-bottom: 6px;
+    flex-shrink: 0;
+  }
+  .quiz-panel {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 14px;
+    border: 1px solid #2a3150;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow-y: auto;
+  }
+  .quiz-word {
+    text-align: center;
+    font-size: 1.45rem;
+    font-weight: 800;
+    margin-bottom: 4px;
+    letter-spacing: 0.5px;
+  }
+  .quiz-type {
+    text-align: center;
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .quiz-sentence {
+    text-align: center;
+    font-size: 0.98rem;
+    margin-bottom: 10px;
+    line-height: 1.45;
+    color: #c5d0e8;
+  }
+  .choices {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    flex: 1;
+  }
+  .choice {
+    background: #222840;
+    border: 2px solid #333a55;
+    border-radius: 12px;
+    padding: 14px 8px;
+    min-height: 52px;
+    font-size: 0.92rem;
+    cursor: pointer;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.12s, border-color 0.12s;
+    word-break: break-word;
+  }
+  .choice:active { background: #2a3250; }
+  .choice.correct { border-color: var(--success); background: rgba(0,230,118,0.18); }
+  .choice.wrong { border-color: var(--danger); background: rgba(255,82,82,0.18); }
+  .speak-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: #2a3250;
+    border: none;
+    color: var(--accent);
+    padding: 8px 14px;
+    min-height: 40px;
+    border-radius: 20px;
+    font-size: 0.88rem;
+    cursor: pointer;
+    margin: 0 auto 8px;
+    -webkit-appearance: none;
+  }
+  .speak-btn:active { opacity: 0.8; }
+  .result-msg {
+    text-align: center;
+    min-height: 22px;
+    font-weight: 700;
+    margin-top: 8px;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+  }
+
+  /* ZUKAN / GACHA / CHARS */
+  .list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    flex: 1;
+  }
+  .card-item {
+    background: var(--card);
+    border-radius: 14px;
+    padding: 14px;
+    border: 1px solid #2a3150;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+  }
+  .card-item .info { flex: 1; min-width: 0; }
+  .card-item .info h3 {
+    font-size: 1.05rem;
+    margin-bottom: 3px;
+    word-break: break-word;
+  }
+  .card-item .info p {
+    font-size: 0.84rem;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+  .empty {
+    text-align: center;
+    color: var(--muted);
+    padding: 40px 16px;
+    line-height: 1.6;
+  }
+  .gacha-area {
+    text-align: center;
+    margin: 12px auto;
+    width: 100%;
+    max-width: 400px;
+  }
+  .gacha-result {
+    min-height: 150px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 18px 0;
+    font-size: 1.1rem;
+  }
+  .gacha-result .char-emoji { font-size: 3.2rem; margin-bottom: 6px; }
+  .rarity-n { color: #94a3b8; }
+  .rarity-r { color: #38bdf8; }
+  .rarity-sr { color: var(--sr); }
+  .rarity-ssr { color: var(--ssr); text-shadow: 0 0 12px rgba(245,158,11,0.5); }
+  .char-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    width: 100%;
+  }
+  @media (min-width: 400px) {
+    .char-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+  .char-card {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 12px 6px;
+    text-align: center;
+    border: 2px solid #2a3150;
+    cursor: pointer;
+  }
+  .char-card.selected {
+    border-color: var(--accent);
+    box-shadow: 0 0 12px rgba(0,229,255,0.3);
+  }
+  .char-card .emoji { font-size: 1.8rem; }
+  .char-card .name { font-size: 0.78rem; margin-top: 3px; word-break: break-all; }
+  .char-card .atk { font-size: 0.7rem; color: var(--gold); }
+  .wave-info { font-size: 0.88rem; color: var(--muted); }
+  .back-area { margin-top: auto; padding-top: 16px; flex-shrink: 0; }
+
+  .char-card .level { font-size:0.68rem; color:var(--accent); margin-top:2px; }
+  .char-card.in-party {
+    border-color: var(--accent2);
+    box-shadow: 0 0 10px rgba(255,45,149,0.25);
+  }
+  .char-card .party-badge {
+    font-size: 0.65rem;
+    color: var(--accent2);
+    font-weight: 700;
+    margin-top: 2px;
+  }
+  .party-panel {
+    background: var(--card);
+    border: 1px solid #2a3150;
+    border-radius: 14px;
+    padding: 12px;
+    margin-bottom: 12px;
+    flex-shrink: 0;
+  }
+  .party-panel h3 {
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin-bottom: 10px;
+    text-align: center;
+    font-weight: 600;
+  }
+  .party-slots {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .party-slot {
+    background: #12162a;
+    border: 2px dashed #333a55;
+    border-radius: 12px;
+    padding: 10px 6px;
+    text-align: center;
+    min-height: 88px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+  }
+  .party-slot.filled {
+    border-style: solid;
+    border-color: var(--accent);
+    background: #1a2238;
+  }
+  .party-slot .slot-num {
+    position: absolute;
+    top: 4px;
+    left: 6px;
+    font-size: 0.65rem;
+    color: var(--muted);
+  }
+  .party-slot .slot-emoji { font-size: 1.7rem; line-height: 1.2; }
+  .party-slot .slot-name { font-size: 0.72rem; margin-top: 2px; word-break: break-all; }
+  .party-slot .slot-atk { font-size: 0.68rem; color: var(--gold); }
+  .party-slot .slot-empty { font-size: 0.75rem; color: var(--muted); }
+  .party-total {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 0.88rem;
+    color: var(--muted);
+  }
+  .party-total span { color: var(--gold); font-weight: 700; }
+  .battle-party {
+    position: absolute;
+    left: 58px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    z-index: 4;
+  }
+  .battle-party .bp-unit {
+    font-size: 1.1rem;
+    line-height: 1.15;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
+  }
+  .upgrade-panel {
+    background:var(--card); border:1px solid #2a3150; border-radius:14px;
+    padding:14px; margin:14px 0; text-align:center;
+  }
+  .upgrade-panel h3 { margin-bottom:6px; }
+  .upgrade-stats { color:var(--muted); font-size:.86rem; line-height:1.5; margin-bottom:10px; }
+  .modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.78);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 20px;
+    padding-top: calc(20px + var(--safe-top));
+    padding-bottom: calc(20px + var(--safe-bottom));
+  }
+  .modal.show { display: flex; }
+  .modal-content {
+    background: var(--bg2);
+    border-radius: 18px;
+    padding: 22px;
+    max-width: 340px;
+    width: 100%;
+    border: 1px solid #2a3150;
+    text-align: center;
+  }
+  .modal-content h2 { margin-bottom: 10px; font-size: 1.25rem; }
+  .modal-content p {
+    color: var(--muted);
+    margin-bottom: 16px;
+    line-height: 1.55;
+    white-space: pre-line;
+    font-size: 0.95rem;
+  }
+
+  @keyframes shake {
+    0%,100% { transform: translateY(-50%) translateX(0); }
+    25% { transform: translateY(-50%) translateX(-4px); }
+    75% { transform: translateY(-50%) translateX(4px); }
+  }
+  .enemy.shake { animation: shake 0.3s; }
+  @keyframes baseShake {
+    0%,100% { transform: translateY(-50%) translateX(0); }
+    25% { transform: translateY(-50%) translateX(-3px); }
+    75% { transform: translateY(-50%) translateX(3px); }
+  }
+  .base.shake { animation: baseShake 0.3s; }
+  @keyframes pop {
+    0% { transform: scale(0.5); opacity: 0; }
+    60% { transform: scale(1.12); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .pop { animation: pop 0.35s ease-out; }
+</style>
+</head>
+<body>
+
+<!-- MENU -->
+<div id="menu" class="screen active">
+  <header>
+    <div class="logo">⚔ Word Guard</div>
+    <div class="stats">
+      <div class="stat">💰 <span id="coinDisplay">0</span></div>
+    </div>
+  </header>
+  <div class="hero">
+    <h1>英検タワーディフェンス</h1>
+    <p>正解して敵を撃退！苦手単語を克服しよう</p>
+  </div>
+  <div class="level-box">
+    <label>難易度（出題単語のみ変化）</label>
+    <select id="levelSelect">
+      <option value="3">英検3級</option>
+      <option value="pre2">英検準2級</option>
+      <option value="2">英検2級</option>
+      <option value="pre1">英検準1級</option>
+      <option value="1">英検1級</option>
+    </select>
+  </div>
+  <div class="level-box" id="menuPartyPreview" style="margin-top:-6px;">
+    <label>バトルパーティー</label>
+    <div id="menuPartyLine" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:0.95rem;">
+      <span style="color:var(--muted);">読み込み中…</span>
+    </div>
+  </div>
+  <div class="menu-grid">
+    <button class="btn" onclick="startBattle()">バトル開始</button>
+    <button class="btn btn-pink" onclick="showScreen('zukan')">図鑑（苦手）</button>
+    <button class="btn btn-gold" onclick="showScreen('gacha')">ガチャ</button>
+    <button class="btn btn-outline" onclick="showScreen('chars')">仲間キャラ</button>
+  </div>
+</div>
+
+<!-- BATTLE -->
+<div id="battle" class="screen">
+  <div class="battle-top">
+    <button class="btn btn-sm btn-outline" onclick="endBattle()">撤退</button>
+    <div class="wave-info">WAVE <span id="waveNum">1</span><span id="waveTotal">/50</span> <small id="waveProgress"></small></div>
+    <div class="stats">
+      <div class="stat">💰 <span id="battleCoin">0</span></div>
+    </div>
+  </div>
+  <div class="field" id="field">
+    <div class="base" id="base">🏰</div>
+    <div class="battle-party" id="battleParty"></div>
+    <div class="base-hp">HP <span id="baseHp">100</span></div>
+  </div>
+  <div class="combo-display" id="comboDisplay"></div>
+  <div class="quiz-panel" id="quizPanel">
+    <div class="quiz-type" id="quizType"></div>
+    <div class="quiz-word" id="quizWord"></div>
+    <button class="speak-btn" id="speakBtn" onclick="speakWord()">🔊 発音を聞く</button>
+    <div class="quiz-sentence" id="quizSentence"></div>
+    <div class="choices" id="choices"></div>
+    <div class="result-msg" id="resultMsg"></div>
+  </div>
+</div>
+
+<!-- ZUKAN -->
+<div id="zukan" class="screen">
+  <header>
+    <div class="logo">📖 苦手単語図鑑</div>
+    <button class="btn btn-sm btn-outline" onclick="showScreen('menu')">戻る</button>
+  </header>
+  <p style="text-align:center;color:var(--muted);margin-bottom:14px;font-size:0.88rem;flex-shrink:0;">
+    間違えた単語が自動でストックされます。<br>覚えたら「卒業」しましょう。
+  </p>
+  <div class="list" id="zukanList"></div>
+</div>
+
+<!-- GACHA -->
+<div id="gacha" class="screen">
+  <header>
+    <div class="logo">🎰 ガチャ</div>
+    <button class="btn btn-sm btn-outline" onclick="showScreen('menu')">戻る</button>
+  </header>
+  <div class="gacha-area">
+    <p style="color:var(--muted);margin-bottom:6px;">所持コイン: <span id="gachaCoin" style="color:var(--gold);font-weight:700;">0</span></p>
+    <p style="font-size:0.88rem;color:var(--muted);margin-bottom:18px;">1回 100コイン / SSR出現率 3%</p>
+    <button class="btn btn-gold" id="gachaBtn" onclick="doGacha()" style="width:100%;max-width:280px;">ガチャを引く</button>
+    <div class="gacha-result" id="gachaResult"></div>
+  </div>
+</div>
+
+<!-- CHARS -->
+<div id="chars" class="screen">
+  <header>
+    <div class="logo">👥 仲間キャラ</div>
+    <button class="btn btn-sm btn-outline" onclick="showScreen('menu')">戻る</button>
+  </header>
+  <p style="text-align:center;color:var(--muted);margin-bottom:10px;font-size:0.88rem;flex-shrink:0;">
+    最大3人まで編成。攻撃力は合計でバトルに反映されます。<br>
+    <span style="font-size:0.8rem;">下のキャラを選ぶ →「パーティーに入れる」／スロットをタップで外す</span>
+  </p>
+  <div class="party-panel" id="partyPanel">
+    <h3>⚔ バトルパーティー</h3>
+    <div class="party-slots" id="partySlots"></div>
+    <div class="party-total" id="partyTotal">合計 ATK <span>0</span></div>
+  </div>
+  <div class="upgrade-panel" id="upgradePanel">
+    キャラクターを選択すると育成・編成できます。
+  </div>
+  <div class="char-grid" id="charGrid"></div>
+</div>
+
+<!-- Modal -->
+<div class="modal" id="modal">
+  <div class="modal-content">
+    <h2 id="modalTitle"></h2>
+    <p id="modalBody"></p>
+    <button class="btn" style="width:100%;" onclick="closeModal()">OK</button>
+  </div>
+</div>
+
+<script>
+// ========== DATA ==========
+const SEED_WORD_BANKS = {
+  "3": [
+    { w: "apple", m: "りんご", ex: "I ate an ___ for breakfast.", opts: ["apple","table","window","river"], col: ["apple","orange","bread","milk"] },
+    { w: "book", m: "本", ex: "She is reading a ___ now.", opts: ["book","desk","pen","bag"], col: ["book","car","tree","dog"] },
+    { w: "happy", m: "幸せな", ex: "I feel ___ today.", opts: ["happy","heavy","hungry","hard"], col: ["happy","sad","tall","fast"] },
+    { w: "school", m: "学校", ex: "We go to ___ every day.", opts: ["school","shop","park","home"], col: ["school","hospital","station","market"] },
+    { w: "friend", m: "友達", ex: "He is my best ___.", opts: ["friend","father","teacher","brother"], col: ["friend","enemy","stranger","neighbor"] },
+    { w: "water", m: "水", ex: "Please give me some ___.", opts: ["water","fire","air","sand"], col: ["water","juice","tea","coffee"] },
+    { w: "music", m: "音楽", ex: "I like listening to ___.", opts: ["music","movie","news","radio"], col: ["music","songs","sounds","noise"] },
+    { w: "family", m: "家族", ex: "My ___ is very kind.", opts: ["family","company","team","class"], col: ["family","friends","parents","relatives"] },
+    { w: "city", m: "都市", ex: "Tokyo is a big ___.", opts: ["city","village","town","country"], col: ["city","capital","metropolis","area"] },
+    { w: "study", m: "勉強する", ex: "I ___ English every night.", opts: ["study","play","watch","sleep"], col: ["study","learn","read","write"] }
+  ],
+  "pre2": [
+    { w: "decide", m: "決める", ex: "We need to ___ the date.", opts: ["decide","divide","derive","delay"], col: ["decide","choose","select","pick"] },
+    { w: "improve", m: "改善する", ex: "I want to ___ my English.", opts: ["improve","import","impress","involve"], col: ["improve","enhance","develop","advance"] },
+    { w: "experience", m: "経験", ex: "He has a lot of ___ in teaching.", opts: ["experience","experiment","expense","expression"], col: ["experience","knowledge","skill","practice"] },
+    { w: "environment", m: "環境", ex: "We must protect the ___.", opts: ["environment","equipment","employment","element"], col: ["environment","nature","surroundings","ecology"] },
+    { w: "opportunity", m: "機会", ex: "This is a great ___ for you.", opts: ["opportunity","opinion","option","operation"], col: ["opportunity","chance","occasion","moment"] },
+    { w: "responsible", m: "責任がある", ex: "You are ___ for this project.", opts: ["responsible","reasonable","reliable","relative"], col: ["responsible","accountable","liable","in charge"] },
+    { w: "suggest", m: "提案する", ex: "I ___ we take a break.", opts: ["suggest","support","supply","succeed"], col: ["suggest","propose","recommend","advise"] },
+    { w: "popular", m: "人気のある", ex: "This song is very ___.", opts: ["popular","possible","powerful","practical"], col: ["popular","famous","well-known","trendy"] },
+    { w: "necessary", m: "必要な", ex: "Sleep is ___ for health.", opts: ["necessary","natural","normal","negative"], col: ["necessary","essential","required","vital"] },
+    { w: "continue", m: "続ける", ex: "Please ___ reading the text.", opts: ["continue","contain","control","consider"], col: ["continue","keep","proceed","maintain"] }
+  ],
+  "2": [
+    { w: "achieve", m: "達成する", ex: "She managed to ___ her goal.", opts: ["achieve","accept","accuse","acquire"], col: ["achieve","accomplish","attain","reach"] },
+    { w: "benefit", m: "利益・恩恵", ex: "Exercise has many health ___.", opts: ["benefits","behaviors","boundaries","burdens"], col: ["benefits","advantages","profits","gains"] },
+    { w: "consequence", m: "結果・影響", ex: "Think about the ___ of your actions.", opts: ["consequences","concepts","conditions","connections"], col: ["consequences","results","outcomes","effects"] },
+    { w: "contribute", m: "貢献する", ex: "Everyone should ___ to the discussion.", opts: ["contribute","control","contain","construct"], col: ["contribute","donate","provide","add"] },
+    { w: "essential", m: "不可欠な", ex: "Water is ___ for life.", opts: ["essential","eventual","external","efficient"], col: ["essential","crucial","vital","indispensable"] },
+    { w: "influence", m: "影響を与える", ex: "Parents strongly ___ their children.", opts: ["influence","inform","involve","invent"], col: ["influence","affect","shape","impact"] },
+    { w: "maintain", m: "維持する", ex: "It is hard to ___ a high level.", opts: ["maintain","mention","manage","measure"], col: ["maintain","keep","preserve","sustain"] },
+    { w: "significant", m: "重要な", ex: "There was a ___ change in policy.", opts: ["significant","similar","specific","sufficient"], col: ["significant","important","considerable","notable"] },
+    { w: "tend", m: "〜する傾向がある", ex: "People ___ to forget bad memories.", opts: ["tend","try","turn","take"], col: ["tend","are likely","are inclined","have a habit"] },
+    { w: "vary", m: "異なる・変わる", ex: "Prices ___ depending on the season.", opts: ["vary","view","value","visit"], col: ["vary","differ","change","fluctuate"] }
+  ],
+  "pre1": [
+    { w: "accommodate", m: "収容する・適応する", ex: "The hotel can ___ 200 guests.", opts: ["accommodate","accumulate","accomplish","acknowledge"], col: ["accommodate","house","lodge","hold"] },
+    { w: "comprehensive", m: "包括的な", ex: "We need a ___ approach to the problem.", opts: ["comprehensive","competitive","comparative","compulsory"], col: ["comprehensive","thorough","complete","all-inclusive"] },
+    { w: "deteriorate", m: "悪化する", ex: "His health began to ___.", opts: ["deteriorate","determine","demonstrate","designate"], col: ["deteriorate","worsen","decline","degenerate"] },
+    { w: "elaborate", m: "詳細に述べる", ex: "Could you ___ on that point?", opts: ["elaborate","eliminate","elevate","evaluate"], col: ["elaborate","expand","detail","clarify"] },
+    { w: "inevitable", m: "避けられない", ex: "Change is ___ in this industry.", opts: ["inevitable","incredible","independent","individual"], col: ["inevitable","unavoidable","certain","inescapable"] },
+    { w: "perspective", m: "視点・見通し", ex: "Try to see it from another ___.", opts: ["perspective","perception","performance","preference"], col: ["perspective","viewpoint","angle","standpoint"] },
+    { w: "prominent", m: "著名な・目立つ", ex: "He is a ___ figure in politics.", opts: ["prominent","permanent","previous","proper"], col: ["prominent","famous","distinguished","leading"] },
+    { w: "reluctant", m: "気が進まない", ex: "She was ___ to accept the offer.", opts: ["reluctant","relevant","reliable","remarkable"], col: ["reluctant","unwilling","hesitant","disinclined"] },
+    { w: "substantial", m: "相当な・実質的な", ex: "There was a ___ increase in sales.", opts: ["substantial","subsequent","sufficient","superficial"], col: ["substantial","considerable","significant","large"] },
+    { w: "vulnerable", m: "脆弱な", ex: "Children are more ___ to the disease.", opts: ["vulnerable","valuable","various","voluntary"], col: ["vulnerable","susceptible","exposed","defenseless"] }
+  ],
+  "1": [
+    { w: "alleviate", m: "軽減する", ex: "The medicine will ___ the pain.", opts: ["alleviate","allocate","alter","amplify"], col: ["alleviate","ease","relieve","mitigate"] },
+    { w: "discrepancy", m: "不一致・食い違い", ex: "There is a ___ between the two reports.", opts: ["discrepancy","discretion","discourse","disposal"], col: ["discrepancy","difference","inconsistency","gap"] },
+    { w: "exacerbate", m: "悪化させる", ex: "His comments only ___ the situation.", opts: ["exacerbated","examined","executed","exerted"], col: ["exacerbate","worsen","aggravate","intensify"] },
+    { w: "meticulous", m: "細心の", ex: "She is ___ about every detail.", opts: ["meticulous","mediocre","melancholy","metaphorical"], col: ["meticulous","careful","thorough","precise"] },
+    { w: "pragmatic", m: "実用的な・現実的な", ex: "We need a more ___ solution.", opts: ["pragmatic","prestigious","profound","prolific"], col: ["pragmatic","practical","realistic","sensible"] },
+    { w: "scrutinize", m: "精査する", ex: "The committee will ___ the proposal.", opts: ["scrutinize","sacrifice","saturate","stimulate"], col: ["scrutinize","examine","inspect","analyze"] },
+    { w: "ubiquitous", m: "至る所にある", ex: "Smartphones have become ___.", opts: ["ubiquitous","unanimous","unprecedented","utilitarian"], col: ["ubiquitous","omnipresent","everywhere","pervasive"] },
+    { w: "ambiguous", m: "曖昧な", ex: "The wording of the law is ___.", opts: ["ambiguous","ambitious","amiable","ample"], col: ["ambiguous","unclear","vague","equivocal"] },
+    { w: "coherent", m: "一貫した・筋の通った", ex: "He presented a ___ argument.", opts: ["coherent","cohesive","concurrent","consecutive"], col: ["coherent","logical","consistent","clear"] },
+    { w: "ephemeral", m: "はかない・短命の", ex: "Fame can be ___.", opts: ["ephemeral","empirical","eloquent","elaborate"], col: ["ephemeral","fleeting","transitory","short-lived"] }
+  ]
+};
+
+// ========== EXPANDED VOCABULARY ==========
+/*
+ * The original prototype contains 10 words per level.  To expand the actual
+ * question pool without making this HTML file enormous, the app loads the
+ * open MIT-licensed Kantan English-Japanese Dictionary at runtime and builds
+ * five 1,500-word pools from its SVL level metadata.
+ *
+ * Mapping used here (approximate difficulty bands):
+ *   3級   SVL 1-3
+ *   準2級 SVL 4-5
+ *   2級   SVL 6-7
+ *   準1級 SVL 8-9
+ *   1級   SVL 10-12
+ *
+ * The existing 50 curated entries remain as a fallback and are preserved
+ * at the front of each pool.
+ */
+const VOCAB_SOURCE_URL =
+  "https://raw.githubusercontent.com/gunyarakun/kantan-ej-dictionary/master/kantan-ej-dictionary.json";
+
+let WORD_BANKS = null;
+let vocabLoadPromise = null;
+
+/**
+ * Kantan EJ dictionary format:
+ *   { "apple": { "ja": ["リンゴ", "りんご"], "rank": 2878, "freq": 676, "svl_level": 1 }, ... }
+ * Also accepts array-of-objects or nested formats as a fallback.
+ */
+function flattenDictionaryEntries(node, out = []) {
+  if (!node) return out;
+
+  // Primary path: top-level word → entry map (kantan-ej-dictionary)
+  if (typeof node === "object" && !Array.isArray(node)) {
+    const keys = Object.keys(node);
+    // Heuristic: if most keys look like English words and values have ja/svl_level, treat as map
+    let mapHits = 0;
+    const sample = keys.slice(0, 30);
+    for (const k of sample) {
+      const v = node[k];
+      if (v && typeof v === "object" && !Array.isArray(v) &&
+          (v.ja != null || v.svl_level != null || v.svl != null || v.meaning_ja != null)) {
+        mapHits++;
+      }
+    }
+    if (mapHits >= Math.min(5, sample.length) || (keys.length > 100 && mapHits >= 3)) {
+      for (const [word, info] of Object.entries(node)) {
+        if (!info || typeof info !== "object") continue;
+        out.push({
+          word,
+          ja: info.ja,
+          meaning_ja: info.meaning_ja,
+          translation: info.translation,
+          translations: info.translations,
+          meanings: info.meanings,
+          level: info.level,
+          svl: info.svl,
+          svl_level: info.svl_level,
+          svlLevel: info.svlLevel,
+          rank_level: info.rank_level,
+          rank: info.rank,
+          freq: info.freq,
+          part_of_speech: info.part_of_speech ?? info.pos,
+          example: info.example,
+          examples: info.examples
+        });
+      }
+      return out;
+    }
+  }
+
+  if (Array.isArray(node)) {
+    node.forEach(v => flattenDictionaryEntries(v, out));
+    return out;
+  }
+  if (typeof node !== "object") return out;
+
+  const word = node.word ?? node.w ?? node.headword ?? node.lemma ?? node.name;
+  const level = node.level ?? node.svl ?? node.svl_level ?? node.svlLevel ?? node.rank_level;
+  const meaning =
+    node.meaning_ja ?? node.translation_ja ?? node.translation ??
+    node.translations_ja ?? node.translations ?? node.ja ?? node.meanings;
+
+  if (typeof word === "string" && word.trim() && meaning != null && level != null) {
+    out.push(node);
+  }
+
+  Object.values(node).forEach(v => {
+    if (v && typeof v === "object") flattenDictionaryEntries(v, out);
+  });
+  return out;
+}
+
+function normalizeMeaning(value) {
+  const clean = (s) => String(s || "")
+    .replace(/^\[.*?\]\s*/g, "")  // drop meta tags like [場面や文脈から特定できる]
+    .replace(/^\(+|\)+$/g, "")
+    .trim();
+
+  if (Array.isArray(value)) {
+    return value
+      .map(v => typeof v === "string" ? v : (v?.ja ?? v?.translation ?? v?.meaning ?? ""))
+      .map(clean)
+      .filter(s => s && !/^\[.*\]$/.test(s))
+      .slice(0, 3)
+      .join(" / ");
+  }
+  if (typeof value === "object" && value) {
+    return clean(value.ja ?? value.translation ?? value.meaning ?? "");
+  }
+  return clean(value);
+}
+
+function inferPartOfSpeech(word, meaning = "") {
+  const m = meaning.toLowerCase();
+  if (/する$|くする$|える$|む$|る$/.test(m) && !/な$/.test(m)) return "verb";
+  if (/な$|的な$|らしい$|い$/.test(m)) return "adjective";
+  if (/に$|く$/.test(m)) return "adverb";
+  return "noun";
+}
+
+function pickContextSentence(w, m, pos) {
+  const s = `${w} ${m}`.toLowerCase();
+
+  if (pos === "verb") {
+    if (/決め|選|判断|決定|確定/.test(m)) return `After comparing the two plans, the team decided to ___ one before Friday.`;
+    if (/改善|向上|発展|進歩/.test(m)) return `After months of practice, her performance began to ___.`;
+    if (/増加|増や|上げ|拡大/.test(m)) return `The company plans to ___ production before the holiday season.`;
+    if (/減少|減ら|下げ|軽減|和らげ/.test(m)) return `The new policy is designed to ___ traffic congestion in the city center.`;
+    if (/避け|防|阻止|妨/.test(m)) return `Wearing protective equipment can ___ serious injuries at work.`;
+    if (/得|獲得|手に入|取得|購入|買/.test(m)) return `She saved money for months to ___ a new laptop.`;
+    if (/調べ|検査|精査|分析|研究|調査/.test(m)) return `Before approving the report, the committee will ___ the data carefully.`;
+    if (/支援|助け|援助|手伝|貢献/.test(m)) return `The charity was created to ___ families affected by the disaster.`;
+    if (/要求|必要|求め/.test(m)) return `The position will ___ excellent communication skills and careful planning.`;
+    if (/影響|作用/.test(m)) return `Social media can strongly ___ how teenagers communicate with one another.`;
+    if (/維持|保つ|保存|守る/.test(m)) return `Regular exercise helps people ___ a healthy lifestyle as they get older.`;
+    if (/提案|勧め|推薦/.test(m)) return `During the meeting, the manager ___ that the deadline be extended by one week.`;
+    if (/続|継続/.test(m)) return `Even when the task became difficult, she chose to ___ working until it was finished.`;
+    if (/変化|変わ|異なる/.test(m)) return `Prices may ___ depending on the season and the location.`;
+    if (/説明|明らか|示|証明/.test(m)) return `The diagram helps ___ why the machine stopped working.`;
+    return `The manager said the team would ___ the plan after reviewing the latest information.`;
+  }
+
+  if (pos === "adjective") {
+    if (/必要|不可欠|重要/.test(m)) return `A reliable internet connection is ___ when you work from home.`;
+    if (/人気|有名|著名/.test(m)) return `The restaurant became ___ after a famous chef recommended it online.`;
+    if (/危険|安全/.test(m)) return `The road is especially ___ after heavy rain, so drivers should slow down.`;
+    if (/難|困難/.test(m)) return `The final exam was so ___ that many students needed extra time.`;
+    if (/可能|不可能/.test(m)) return `With the right equipment, the task is completely ___.`;
+    if (/十分|充分/.test(m)) return `We do not have ___ evidence to make a final decision yet.`;
+    if (/相当|大き|重要な|かなり/.test(m)) return `The project required a ___ amount of time and money.`;
+    if (/避けられ|必然|確実/.test(m)) return `Given the severe weather warning, some delays were ___.`;
+    if (/脆弱|弱|影響を受け/.test(m)) return `Young children are particularly ___ to sudden changes in temperature.`;
+    if (/曖昧|不明確|明確/.test(m)) return `The instructions were so ___ that several employees interpreted them differently.`;
+    return `The manager rejected the proposal because its main argument was not ___.`;
+  }
+
+  if (pos === "adverb") {
+    if (/急|突然/.test(m)) return `The lights went out ___, leaving everyone in the dark.`;
+    if (/慎重|注意深/.test(m)) return `The scientist examined the sample ___ before recording the results.`;
+    if (/完全|十分|大いに/.test(m)) return `The new system is ___ different from the one we used last year.`;
+    return `The speaker explained the issue ___ so that everyone could understand it.`;
+  }
+
+  // Nouns: use a concrete situation so that the surrounding words provide a real clue.
+  if (/機会|好機|チャンス/.test(m)) return `The internship gave her an excellent ___ to work abroad for six months.`;
+  if (/結果|影響|結末/.test(m)) return `The decision had an unexpected ___ for local businesses.`;
+  if (/利益|恩恵|利点|長所/.test(m)) return `One major ___ of regular exercise is better sleep at night.`;
+  if (/経験/.test(m)) return `Teaching abroad gave him valuable ___ that helped him later in his career.`;
+  if (/環境/.test(m)) return `The factory was fined for releasing chemicals into the surrounding ___.`;
+  if (/問題|課題|困難/.test(m)) return `The engineers met to discuss the main ___ with the new bridge design.`;
+  if (/理由|原因/.test(m)) return `The police are still investigating the exact ___ for the sudden fire.`;
+  if (/方法|手段|方式/.test(m)) return `We need to find a more efficient ___ of transporting the equipment.`;
+  if (/意見|考え|見解/.test(m)) return `Everyone at the meeting was invited to share an ___ about the proposed changes.`;
+  if (/証拠|証明/.test(m)) return `The lawyer presented new ___ that changed the direction of the trial.`;
+  if (/責任/.test(m)) return `The manager accepted full ___ for the mistake in the report.`;
+  if (/視点|観点/.test(m)) return `Try looking at the problem from a different ___.`;
+  return `The report highlighted an important ___ that the research team had noticed during the study.`;
+}
+
+function normalizeWord(entry) {
+  const w = String(entry.word ?? entry.w ?? entry.headword ?? entry.lemma ?? entry.name ?? "").trim();
+  const m = normalizeMeaning(
+    entry.meaning_ja ?? entry.translation_ja ?? entry.translation ??
+    entry.translations_ja ?? entry.translations ?? entry.ja ?? entry.meanings
+  ).trim();
+
+  if (!w || !m || w.length > 40 || !/^[A-Za-z][A-Za-z' -]*$/.test(w)) return null;
+
+  // If a future dictionary source supplies examples, prefer them.
+  const suppliedExample =
+    entry.example ?? entry.example_sentence ?? entry.exampleSentence ??
+    (Array.isArray(entry.examples) ? (entry.examples[0]?.en ?? entry.examples[0]?.english ?? entry.examples[0]) : null);
+
+  const pos = entry.part_of_speech ?? entry.pos ?? entry.partOfSpeech ?? inferPartOfSpeech(w, m);
+  const ex = typeof suppliedExample === "string" && suppliedExample.includes(w)
+    ? suppliedExample.replace(new RegExp(w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i"), "___")
+    : pickContextSentence(w, m, pos);
+
+  return {
+    w,
+    m,
+    ex,
+    pos,
+    opts: [w],
+    col: [w]
+  };
+}
+
+function numericLevel(entry) {
+  const raw = entry.level ?? entry.svl ?? entry.svl_level ?? entry.svlLevel ?? entry.rank_level;
+  const n = Number.parseFloat(String(raw).replace(/[^\d.]/g, ""));
+  return Number.isFinite(n) ? n : null;
+}
+
+function addUnique(target, item, seen) {
+  if (!item || seen.has(item.w.toLowerCase())) return;
+  seen.add(item.w.toLowerCase());
+  target.push(item);
+}
+
+function buildExpandedBanks(entries) {
+  const ranges = {
+    "3": [1, 3],
+    pre2: [4, 5],
+    "2": [6, 7],
+    pre1: [8, 9],
+    "1": [10, 12]
+  };
+
+  const banks = {};
+  const byLevel = Object.keys(ranges).reduce((o, k) => (o[k] = [], o), {});
+
+  for (const raw of entries) {
+    const lvl = numericLevel(raw);
+    if (lvl == null) continue;
+    const item = normalizeWord(raw);
+    if (!item) continue;
+    // Prefer higher-frequency words within the same band (lower rank = more common)
+    item._rank = Number(raw.rank) || 999999;
+
+    for (const [key, [min, max]] of Object.entries(ranges)) {
+      if (lvl >= min && lvl <= max) byLevel[key].push(item);
+    }
+  }
+
+  // Sort each band by frequency rank so the first 1,500 are the most common
+  for (const key of Object.keys(byLevel)) {
+    byLevel[key].sort((a, b) => a._rank - b._rank);
+  }
+
+  const levelKeys = Object.keys(ranges);
+  for (const key of levelKeys) {
+    const seen = new Set();
+    const result = [];
+
+    // Preserve the hand-curated words first.
+    for (const item of (SEED_WORD_BANKS[key] || [])) {
+      const copy = { ...item, pos: item.pos || inferPartOfSpeech(item.w, item.m) };
+      addUnique(result, copy, seen);
+    }
+
+    // Then use the dictionary's frequency ordering.
+    for (const item of byLevel[key]) {
+      if (result.length >= 1500) break;
+      addUnique(result, item, seen);
+    }
+
+    /*
+     * If a strict SVL band ever has fewer than 1,500 entries in a future
+     * dictionary revision, fill from adjacent levels rather than silently
+     * reducing the advertised pool size.
+     */
+    if (result.length < 1500) {
+      const allCandidates = [];
+      for (const other of levelKeys) {
+        for (const item of byLevel[other]) {
+          if (!seen.has(item.w.toLowerCase())) allCandidates.push(item);
+        }
+      }
+      allCandidates.sort((a, b) => a._rank - b._rank);
+      for (const item of allCandidates) {
+        if (result.length >= 1500) break;
+        addUnique(result, item, seen);
+      }
+    }
+
+    // Strip internal rank helper before storing
+    banks[key] = result.slice(0, 1500).map(({ _rank, ...rest }) => rest);
+  }
+
+  return banks;
+}
+
+async function ensureWordBanks() {
+  if (WORD_BANKS) return WORD_BANKS;
+  if (vocabLoadPromise) return vocabLoadPromise;
+
+  vocabLoadPromise = (async () => {
+    try {
+      const response = await fetch(VOCAB_SOURCE_URL, { cache: "force-cache" });
+      if (!response.ok) throw new Error(`Vocabulary fetch failed: ${response.status}`);
+      const data = await response.json();
+      const entries = flattenDictionaryEntries(data);
+      const expanded = buildExpandedBanks(entries);
+
+      const complete = ["3", "pre2", "2", "pre1", "1"].every(
+        key => expanded[key] && expanded[key].length >= 1500
+      );
+
+      if (!complete) throw new Error("The downloaded dictionary did not provide enough words.");
+      WORD_BANKS = expanded;
+      try {
+        localStorage.setItem("wordGuardVocabCacheV2", JSON.stringify(WORD_BANKS));
+      } catch (e) {}
+    } catch (e) {
+      console.warn("Word bank load failed:", e);
+      // Use a previously cached expanded bank if available.
+      try {
+        const cached = JSON.parse(localStorage.getItem("wordGuardVocabCacheV2") || localStorage.getItem("wordGuardVocabCacheV1") || "null");
+        if (cached && ["3", "pre2", "2", "pre1", "1"].every(k => Array.isArray(cached[k]) && cached[k].length >= 1500)) {
+          WORD_BANKS = cached;
+          return WORD_BANKS;
+        }
+      } catch (ignore) {}
+
+      // Last-resort fallback: keep the original app usable.
+      WORD_BANKS = SEED_WORD_BANKS;
+    }
+    return WORD_BANKS;
+  })();
+
+  return vocabLoadPromise;
+}
+
+
+const CHARACTERS = [
+  { id: "c1", name: "ガーディアン", emoji: "🛡️", rarity: "N", atk: 10 },
+  { id: "c2", name: "アーチャー", emoji: "🏹", rarity: "N", atk: 12 },
+  { id: "c3", name: "メイジ", emoji: "🧙", rarity: "R", atk: 18 },
+  { id: "c4", name: "ナイト", emoji: "⚔️", rarity: "R", atk: 20 },
+  { id: "c5", name: "フェニックス", emoji: "🔥", rarity: "SR", atk: 32 },
+  { id: "c6", name: "ドラゴン", emoji: "🐉", rarity: "SR", atk: 35 },
+  { id: "c7", name: "エンジェル", emoji: "👼", rarity: "SSR", atk: 50 },
+  { id: "c8", name: "デーモンロード", emoji: "😈", rarity: "SSR", atk: 55 }
+];
+
+const ENEMY_EMOJIS = ["👾", "🧟", "👻", "🦖", "🦇", "🕷️", "🦂", "🤖"];
+
+// ========== STATE ==========
+let state = {
+  coins: 300,
+  ownedChars: ["c1"],
+  activeChar: "c1",   // selected for upgrade UI (legacy + detail panel)
+  party: ["c1"],      // up to 3 character ids for battle
+  weakWords: [],
+  level: "3",
+  characterLevels: {}
+};
+
+function normalizeParty() {
+  let party = Array.isArray(state.party) ? state.party.slice() : [];
+  // Migrate from single activeChar if party is empty
+  if (party.length === 0 && state.activeChar) party = [state.activeChar];
+  // Keep only owned, unique, max 3
+  const seen = new Set();
+  party = party.filter(id => {
+    if (!id || !state.ownedChars.includes(id) || seen.has(id)) return false;
+    seen.add(id);
+    return true;
+  }).slice(0, 3);
+  if (party.length === 0) {
+    const fallback = state.ownedChars[0] || "c1";
+    party = [fallback];
+    if (!state.ownedChars.includes(fallback)) state.ownedChars = [fallback];
+  }
+  state.party = party;
+  if (!state.activeChar || !state.ownedChars.includes(state.activeChar)) {
+    state.activeChar = party[0];
+  }
+}
+
+function loadState() {
+  try {
+    const s = localStorage.getItem("wordGuardSave");
+    if (s) {
+      const parsed = JSON.parse(s);
+      state = { ...state, ...parsed };
+    }
+  } catch (e) {}
+  normalizeParty();
+}
+function saveState() {
+  try {
+    normalizeParty();
+    localStorage.setItem("wordGuardSave", JSON.stringify(state));
+  } catch (e) {}
+}
+loadState();
+
+// ========== UI HELPERS ==========
+function showScreen(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  updateUI();
+  if (id === "zukan") renderZukan();
+  if (id === "gacha") document.getElementById("gachaCoin").textContent = state.coins;
+  if (id === "chars") renderChars();
+}
+function updateUI() {
+  document.getElementById("coinDisplay").textContent = state.coins;
+  document.getElementById("gachaCoin").textContent = state.coins;
+  document.getElementById("levelSelect").value = state.level;
+  renderMenuPartyPreview();
+}
+function renderMenuPartyPreview() {
+  const line = document.getElementById("menuPartyLine");
+  if (!line) return;
+  normalizeParty();
+  const members = getPartyCharacters();
+  const emojis = members.map(c => c.emoji).join(" ");
+  const names = members.map(c => c.name).join("・");
+  line.innerHTML = `
+    <span style="font-size:1.25rem;">${emojis}</span>
+    <span>${names}</span>
+    <span style="color:var(--gold);font-weight:700;">合計 ATK ${getPartyTotalAtk()}</span>
+    <span style="color:var(--muted);font-size:0.8rem;">（${members.length}/3）</span>
+  `;
+}
+document.getElementById("levelSelect").addEventListener("change", e => {
+  state.level = e.target.value;
+  saveState();
+});
+
+function showModal(title, body) {
+  document.getElementById("modalTitle").textContent = title;
+  document.getElementById("modalBody").textContent = body;
+  document.getElementById("modal").classList.add("show");
+}
+function closeModal() {
+  document.getElementById("modal").classList.remove("show");
+}
+
+// ========== BATTLE ==========
+let battle = null;
+
+async function startBattle() {
+  state.level = document.getElementById("levelSelect").value;
+  const startBtn = document.querySelector('#menu .menu-grid .btn');
+  if (startBtn) {
+    startBtn.disabled = true;
+    startBtn.textContent = "単語データ読み込み中…";
+  }
+  await ensureWordBanks();
+  if (startBtn) {
+    startBtn.disabled = false;
+    startBtn.textContent = "バトル開始";
+  }
+  saveState();
+  normalizeParty();
+  const partyChars = getPartyCharacters();
+  const partyAtk = getPartyTotalAtk();
+  battle = {
+    baseHp: 100,
+    maxBaseHp: 100,
+    coinsEarned: 0,
+    wave: 1,
+    waveSize: 30,
+    totalWords: 1500,
+    wordIndex: 0,
+    waveWords: [],
+    combo: 0,
+    enemies: [],
+    currentQuiz: null,
+    answered: false,
+    spawnTimer: 0,
+    tick: null,
+    partyIds: partyChars.map(c => c.id),
+    charAtk: partyAtk,
+    over: false
+  };
+  // Show party on the field
+  const bp = document.getElementById("battleParty");
+  if (bp) {
+    bp.innerHTML = partyChars.map(c => `<div class="bp-unit" title="${c.name}">${c.emoji}</div>`).join("");
+  }
+  // Each level is an independent 1,500-word course. A run shuffles all
+  // 1,500 words once, then consumes them exactly once: 30 words per wave × 50 waves.
+  const sourceBank = (WORD_BANKS && WORD_BANKS[state.level]) || [];
+  const uniqueWords = [];
+  const seenWords = new Set();
+  sourceBank.forEach(item => {
+    const key = String(item.w || "").toLowerCase();
+    if (key && !seenWords.has(key)) { seenWords.add(key); uniqueWords.push(item); }
+  });
+  if (uniqueWords.length < 1500) {
+    battle = null;
+    showModal("単語データ不足", `このレベルの単語データが1,500語未満です（${uniqueWords.length}語）。`);
+    return;
+  }
+  battle.waveWords = shuffle(uniqueWords.slice(0, 1500));
+  document.getElementById("battleCoin").textContent = "0";
+  document.getElementById("waveNum").textContent = "1";
+  document.getElementById("waveTotal").textContent = "/50";
+  document.getElementById("waveProgress").textContent = "1–30 / 1500語";
+  document.getElementById("baseHp").textContent = "100";
+  document.getElementById("comboDisplay").textContent = "";
+  clearEnemies();
+  showScreen("battle");
+  nextQuiz();
+  battle.tick = setInterval(gameLoop, 50);
+}
+
+function endBattle() {
+  if (battle && battle.tick) clearInterval(battle.tick);
+  if (battle && battle.coinsEarned > 0) {
+    state.coins += battle.coinsEarned;
+    saveState();
+  }
+  battle = null;
+  showScreen("menu");
+  updateUI();
+}
+
+function clearEnemies() {
+  document.querySelectorAll(".enemy").forEach(e => e.remove());
+}
+
+function gameLoop() {
+  if (!battle || battle.over) return;
+  battle.spawnTimer++;
+  if (battle.spawnTimer > 80 - Math.min(battle.wave * 3, 40)) {
+    spawnEnemy();
+    battle.spawnTimer = 0;
+  }
+  const fieldW = document.getElementById("field").offsetWidth;
+  for (let i = battle.enemies.length - 1; i >= 0; i--) {
+    const en = battle.enemies[i];
+    en.x -= 0.35 + battle.wave * 0.02;
+    en.el.style.left = en.x + "px";
+    if (en.x < 62) {
+      battle.baseHp -= 15;
+      document.getElementById("baseHp").textContent = Math.max(0, battle.baseHp);
+      en.el.remove();
+      battle.enemies.splice(i, 1);
+      const base = document.getElementById("base");
+      base.classList.add("shake");
+      setTimeout(() => base.classList.remove("shake"), 300);
+      if (battle.baseHp <= 0) {
+        battleOver(false);
+      }
+    }
+  }
+}
+
+function spawnEnemy() {
+  if (!battle || battle.enemies.length >= 5) return;
+  const field = document.getElementById("field");
+  const el = document.createElement("div");
+  el.className = "enemy";
+  const emoji = ENEMY_EMOJIS[Math.floor(Math.random() * ENEMY_EMOJIS.length)];
+  const hp = 30 + battle.wave * 12;
+  el.innerHTML = emoji + `<div class="ehp">${hp}</div>`;
+  el.style.left = (field.offsetWidth - 10) + "px";
+  field.appendChild(el);
+  battle.enemies.push({ el, x: field.offsetWidth - 10, hp, maxHp: hp });
+}
+
+function meaningTokens(text) {
+  return new Set(
+    String(text || "")
+      .toLowerCase()
+      .replace(/[・、。/（）()「」『』]/g, " ")
+      .split(/\s+/)
+      .flatMap(x => x.split(/[、,／]/))
+      .filter(x => x.length >= 2)
+  );
+}
+
+function likelySameMeaning(a, b) {
+  if (!a || !b) return false;
+  const am = meaningTokens(a.m);
+  const bm = meaningTokens(b.m);
+  for (const token of am) {
+    if (bm.has(token)) return true;
+  }
+
+  // Also reject obvious English morphological relatives.
+  const aw = a.w.toLowerCase().replace(/[^a-z]/g, "");
+  const bw = b.w.toLowerCase().replace(/[^a-z]/g, "");
+  if (aw === bw) return true;
+  if (aw.length >= 5 && bw.length >= 5 &&
+      (aw.startsWith(bw) || bw.startsWith(aw))) return true;
+
+  return false;
+}
+
+function getQuestionDistractors(bank, word, count = 3) {
+  const targetPos = word.pos || inferPartOfSpeech(word.w, word.m);
+  const candidates = bank.filter(x =>
+    x !== word &&
+    (x.pos || inferPartOfSpeech(x.w, x.m)) === targetPos &&
+    !likelySameMeaning(x, word)
+  );
+
+  // Prefer words whose meanings have no shared Japanese tokens at all.
+  const strict = candidates.filter(x => {
+    const a = meaningTokens(x.m);
+    const b = meaningTokens(word.m);
+    return ![...a].some(t => b.has(t));
+  });
+
+  const pool = strict.length >= count ? strict : candidates;
+  shuffle(pool);
+
+  const result = [];
+  const seen = new Set([word.w.toLowerCase()]);
+  for (const item of pool) {
+    if (result.length >= count) break;
+    const key = item.w.toLowerCase();
+    if (!seen.has(key)) {
+      seen.add(key);
+      result.push(item);
+    }
+  }
+
+  // Final fallback: unrelated words from the bank, never the curated synonym list.
+  if (result.length < count) {
+    const fallback = bank.filter(x => x !== word && !likelySameMeaning(x, word));
+    shuffle(fallback);
+    for (const item of fallback) {
+      if (result.length >= count) break;
+      if (!result.some(x => x.w.toLowerCase() === item.w.toLowerCase())) result.push(item);
+    }
+  }
+  return result;
+}
+
+function nextQuiz() {
+  if (!battle || battle.over) return;
+
+  // One word is used per question, in the shuffled 1,500-word course order.
+  // This guarantees that every word in the selected level is covered once.
+  if (battle.wordIndex >= battle.totalWords) {
+    finishLevel();
+    return;
+  }
+  const waveStart = Math.floor(battle.wordIndex / battle.waveSize) * battle.waveSize;
+  const waveEnd = Math.min(waveStart + battle.waveSize, battle.totalWords);
+  const calculatedWave = Math.floor(battle.wordIndex / battle.waveSize) + 1;
+  if (battle.wave !== calculatedWave) {
+    battle.wave = calculatedWave;
+    clearEnemies();
+    battle.enemies = [];
+    battle.spawnTimer = 0;
+  }
+  battle.answered = false;
+  document.getElementById("resultMsg").textContent = "";
+  document.getElementById("waveNum").textContent = battle.wave;
+  document.getElementById("waveTotal").textContent = "/50";
+  document.getElementById("waveProgress").textContent = `${battle.wordIndex + 1}–${waveEnd} / 1500語`;
+  const word = battle.waveWords[battle.wordIndex];
+  const isMeaning = Math.random() < 0.5;
+  battle.currentQuiz = { word, isMeaning };
+
+  const typeEl = document.getElementById("quizType");
+  const wordEl = document.getElementById("quizWord");
+  const sentEl = document.getElementById("quizSentence");
+  const choicesEl = document.getElementById("choices");
+
+  // Distractor pool: full level bank (not just the remaining course words)
+  const bank = (WORD_BANKS && WORD_BANKS[state.level]) || battle.waveWords || [];
+
+  if (isMeaning) {
+    typeEl.textContent = "【意味・瞬発力】この単語の意味は？";
+    wordEl.textContent = word.w;
+    sentEl.textContent = "";
+
+    // Meaning choices are deliberately selected from semantically unrelated
+    // words.  The old curated `col` arrays were synonym lists, so they are
+    // never used as distractors here.
+    const distractors = getQuestionDistractors(bank, word, 3);
+    let opts = [word.m, ...distractors.map(x => x.m)];
+    shuffle(opts);
+    choicesEl.innerHTML = opts.map(o => `<div class="choice" data-v="${o}">${o}</div>`).join("");
+  } else {
+    typeEl.textContent = "【使い方・コロケーション】空欄に入る語は？";
+    wordEl.textContent = "";
+    sentEl.textContent = word.ex.replace("___", "______");
+
+    // Keep distractors grammatically plausible (same part of speech) while
+    // explicitly excluding likely synonyms of the answer.
+    const distractors = getQuestionDistractors(bank, word, 3);
+    let opts = [word.w, ...distractors.map(x => x.w)];
+    shuffle(opts);
+    choicesEl.innerHTML = opts.map(o => `<div class="choice" data-v="${o}">${o}</div>`).join("");
+  }
+
+  choicesEl.querySelectorAll(".choice").forEach(c => {
+    c.onclick = () => answer(c.dataset.v, c);
+  });
+}
+
+function answer(val, el) {
+  if (!battle || battle.answered || battle.over) return;
+  battle.answered = true;
+  const q = battle.currentQuiz;
+  const correct = q.isMeaning ? q.word.m : q.word.w;
+  const isCorrect = val === correct;
+
+  document.querySelectorAll(".choice").forEach(c => {
+    c.style.pointerEvents = "none";
+    if (c.dataset.v === correct) c.classList.add("correct");
+  });
+  if (!isCorrect) el.classList.add("wrong");
+
+  if (isCorrect) {
+    battle.combo++;
+    document.getElementById("comboDisplay").textContent = battle.combo > 1 ? `🔥 ${battle.combo} COMBO!` : "✔ 正解!";
+    document.getElementById("resultMsg").textContent = "攻撃！";
+    document.getElementById("resultMsg").style.color = "var(--success)";
+    dealDamage();
+  } else {
+    battle.combo = 0;
+    document.getElementById("comboDisplay").textContent = "";
+    document.getElementById("resultMsg").textContent = `不正解… 正解は「${correct}」`;
+    document.getElementById("resultMsg").style.color = "var(--danger)";
+    addWeakWord(q.word);
+  }
+
+  // The question is consumed regardless of whether the player was correct.
+  battle.wordIndex++;
+  setTimeout(() => {
+    if (!battle || battle.over) return;
+    if (battle.wordIndex >= battle.totalWords) {
+      finishLevel();
+    } else {
+      const newWave = Math.floor(battle.wordIndex / battle.waveSize) + 1;
+      if (newWave !== battle.wave) {
+        battle.wave = newWave;
+        clearEnemies();
+        battle.enemies = [];
+        battle.spawnTimer = 0;
+        document.getElementById("resultMsg").textContent = `🎉 WAVE ${battle.wave - 1} CLEAR!`;
+        document.getElementById("resultMsg").style.color = "var(--gold)";
+        setTimeout(() => { if (battle && !battle.over) nextQuiz(); }, 700);
+      } else {
+        nextQuiz();
+      }
+    }
+  }, 900);
+}
+
+function dealDamage() {
+  if (!battle.enemies.length) return;
+  // Sort enemies by distance (closest first); multi-member party can hit multiple targets
+  const sorted = [...battle.enemies].sort((a, b) => a.x - b.x);
+  const partySize = Math.max(1, (battle.partyIds || []).length);
+  // Each member contributes their share of total ATK; overflow hits next enemy
+  const totalDmg = Math.floor(battle.charAtk * (1 + battle.combo * 0.15));
+  let remaining = totalDmg;
+  const hits = Math.min(partySize, sorted.length);
+  for (let i = 0; i < hits && remaining > 0; i++) {
+    const target = sorted[i];
+    // First (closest) enemy takes the bulk; others share leftover
+    const share = i === 0
+      ? Math.ceil(remaining * (hits === 1 ? 1 : 0.55))
+      : Math.ceil(remaining / (hits - i));
+    const dmg = Math.min(share, remaining);
+    remaining -= dmg;
+    target.hp -= dmg;
+    target.el.querySelector(".ehp").textContent = Math.max(0, target.hp);
+    target.el.classList.add("shake");
+    setTimeout(() => target.el.classList.remove("shake"), 300);
+  }
+  // Remove defeated enemies
+  for (let i = battle.enemies.length - 1; i >= 0; i--) {
+    const en = battle.enemies[i];
+    if (en.hp <= 0) {
+      en.el.remove();
+      battle.enemies.splice(i, 1);
+      const gain = 8 + battle.wave * 2;
+      battle.coinsEarned += gain;
+    }
+  }
+  document.getElementById("battleCoin").textContent = battle.coinsEarned;
+}
+
+function finishLevel() {
+  if (!battle || battle.over) return;
+  battle.over = true;
+  clearInterval(battle.tick);
+  state.coins += battle.coinsEarned;
+  saveState();
+  showModal(
+    `${state.level === "3" ? "英検3級" : state.level === "pre2" ? "英検準2級" : state.level === "2" ? "英検2級" : state.level === "pre1" ? "英検準1級" : "英検1級"} COMPLETE!`,
+    `1,500語をすべて学習しました！\n獲得コイン: ${battle.coinsEarned}`
+  );
+  setTimeout(() => {
+    battle = null;
+    showScreen("menu");
+    updateUI();
+  }, 1800);
+}
+
+function battleOver(win) {
+  battle.over = true;
+  clearInterval(battle.tick);
+  state.coins += battle.coinsEarned;
+  saveState();
+  showModal(
+    win ? "勝利！" : "基地が陥落…",
+    `獲得コイン: ${battle.coinsEarned}\nWAVE: ${battle.wave}`
+  );
+  setTimeout(() => {
+    battle = null;
+    showScreen("menu");
+    updateUI();
+  }, 1600);
+}
+
+function speakWord() {
+  if (!battle || !battle.currentQuiz) return;
+  if (!window.speechSynthesis) return;
+  const u = new SpeechSynthesisUtterance(battle.currentQuiz.word.w);
+  u.lang = "en-US";
+  u.rate = 0.9;
+  speechSynthesis.cancel();
+  speechSynthesis.speak(u);
+}
+
+function addWeakWord(word) {
+  if (state.weakWords.some(w => w.w === word.w && w.level === state.level)) return;
+  state.weakWords.push({
+    w: word.w,
+    m: word.m,
+    ex: word.ex,
+    level: state.level
+  });
+  saveState();
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// ========== ZUKAN ==========
+function renderZukan() {
+  const list = document.getElementById("zukanList");
+  if (!state.weakWords.length) {
+    list.innerHTML = `<div class="empty">まだ苦手単語はありません。<br>バトルで間違えるとここにストックされます。</div>`;
+    return;
+  }
+  const levelNames = { "3": "3級", "pre2": "準2級", "2": "2級", "pre1": "準1級", "1": "1級" };
+  list.innerHTML = state.weakWords.map((w, i) => `
+    <div class="card-item">
+      <div class="info">
+        <h3>${w.w} <small style="color:var(--muted);font-weight:400;">(${levelNames[w.level] || w.level})</small></h3>
+        <p>${w.m}</p>
+        <p style="margin-top:3px;">例: ${w.ex.replace("___", "<b>" + w.w + "</b>")}</p>
+      </div>
+      <button class="btn btn-sm btn-pink" onclick="graduate(${i})">卒業</button>
+    </div>
+  `).join("");
+}
+function graduate(idx) {
+  state.weakWords.splice(idx, 1);
+  saveState();
+  renderZukan();
+}
+
+// ========== GACHA ==========
+function doGacha() {
+  if (state.coins < 100) {
+    showModal("コイン不足", "ガチャには100コイン必要です。\nバトルで稼ぎましょう！");
+    return;
+  }
+  state.coins -= 100;
+  saveState();
+  updateUI();
+  document.getElementById("gachaCoin").textContent = state.coins;
+
+  const r = Math.random();
+  let rarity;
+  if (r < 0.03) rarity = "SSR";
+  else if (r < 0.20) rarity = "SR";
+  else if (r < 0.50) rarity = "R";
+  else rarity = "N";
+
+  const pool = CHARACTERS.filter(c => c.rarity === rarity);
+  const got = pool[Math.floor(Math.random() * pool.length)];
+  const isNew = !state.ownedChars.includes(got.id);
+  if (isNew) {
+    state.ownedChars.push(got.id);
+    state.characterLevels[got.id] = 1;
+  }
+  saveState();
+
+  const res = document.getElementById("gachaResult");
+  res.innerHTML = `
+    <div class="char-emoji pop">${got.emoji}</div>
+    <div class="rarity-${got.rarity.toLowerCase()}">${got.rarity}</div>
+    <div style="font-weight:700;margin-top:4px;">${got.name}</div>
+    <div style="font-size:0.88rem;color:var(--muted);">ATK ${got.atk}</div>
+    <div style="margin-top:8px;color:${isNew ? "var(--success)" : "var(--muted)"};">
+      ${isNew ? "🎉 NEW!" : "（既に所持）"}
+    </div>
+  `;
+}
+
+// ========== CHARS / PARTY ==========
+function getCharLevel(id) {
+  const lv = Number(state.characterLevels?.[id]);
+  return Number.isFinite(lv) && lv >= 1 ? Math.floor(lv) : 1;
+}
+function getCharAtk(char) {
+  const lv = getCharLevel(char.id);
+  return char.atk + (lv - 1) * 3;
+}
+function getPartyCharacters() {
+  normalizeParty();
+  return state.party
+    .map(id => CHARACTERS.find(c => c.id === id))
+    .filter(Boolean);
+}
+function getPartyTotalAtk() {
+  return getPartyCharacters().reduce((sum, c) => sum + getCharAtk(c), 0);
+}
+function getUpgradeCost(id) {
+  const lv = getCharLevel(id);
+  return Math.floor(80 * Math.pow(1.35, lv - 1));
+}
+function upgradeCharacter(id) {
+  if (!state.ownedChars.includes(id)) return;
+  const char = CHARACTERS.find(c => c.id === id);
+  if (!char) return;
+  const lv = getCharLevel(id);
+  const cost = getUpgradeCost(id);
+  if (state.coins < cost) {
+    showModal("コイン不足", `「${char.name}」の強化には ${cost} コイン必要です。\nバトルでコインを集めましょう！`);
+    return;
+  }
+  state.coins -= cost;
+  state.characterLevels[id] = lv + 1;
+  saveState();
+  updateUI();
+  renderChars();
+  showModal("レベルアップ！", `「${char.name}」が Lv.${lv + 1} になりました！\n攻撃力: ${getCharAtk(char)}\nパーティー合計 ATK: ${getPartyTotalAtk()}`);
+}
+function toggleParty(id) {
+  if (!state.ownedChars.includes(id)) return;
+  normalizeParty();
+  const idx = state.party.indexOf(id);
+  if (idx >= 0) {
+    // Remove (keep at least 1)
+    if (state.party.length <= 1) {
+      showModal("パーティー", "パーティーには最低1人必要です。");
+      return;
+    }
+    state.party.splice(idx, 1);
+  } else {
+    if (state.party.length >= 3) {
+      showModal("パーティー満員", "パーティーは最大3人です。\nスロットをタップして外してから追加してください。");
+      return;
+    }
+    state.party.push(id);
+  }
+  state.activeChar = id;
+  saveState();
+  renderChars();
+}
+function removeFromParty(slotIndex) {
+  normalizeParty();
+  if (slotIndex < 0 || slotIndex >= state.party.length) return;
+  if (state.party.length <= 1) {
+    showModal("パーティー", "パーティーには最低1人必要です。");
+    return;
+  }
+  state.party.splice(slotIndex, 1);
+  saveState();
+  renderChars();
+}
+function renderPartySlots() {
+  const slotsEl = document.getElementById("partySlots");
+  const totalEl = document.getElementById("partyTotal");
+  if (!slotsEl) return;
+  normalizeParty();
+  const members = getPartyCharacters();
+  let html = "";
+  for (let i = 0; i < 3; i++) {
+    const c = members[i];
+    if (c) {
+      html += `
+        <div class="party-slot filled" onclick="removeFromParty(${i})" title="タップで外す">
+          <span class="slot-num">${i + 1}</span>
+          <div class="slot-emoji">${c.emoji}</div>
+          <div class="slot-name">${c.name}</div>
+          <div class="slot-atk">ATK ${getCharAtk(c)}</div>
+        </div>`;
+    } else {
+      html += `
+        <div class="party-slot">
+          <span class="slot-num">${i + 1}</span>
+          <div class="slot-empty">空き<br><small>下から選択</small></div>
+        </div>`;
+    }
+  }
+  slotsEl.innerHTML = html;
+  if (totalEl) {
+    totalEl.innerHTML = `合計 ATK <span>${getPartyTotalAtk()}</span>（${members.length}/3人）`;
+  }
+}
+function renderUpgradePanel() {
+  const panel = document.getElementById("upgradePanel");
+  if (!panel) return;
+  const char = CHARACTERS.find(c => c.id === state.activeChar);
+  if (!char || !state.ownedChars.includes(char.id)) {
+    panel.innerHTML = "キャラクターを選択すると育成できます。";
+    return;
+  }
+  const lv = getCharLevel(char.id);
+  const atk = getCharAtk(char);
+  const cost = getUpgradeCost(char.id);
+  const inParty = state.party.includes(char.id);
+  panel.innerHTML = `
+    <h3>${char.emoji} ${char.name}</h3>
+    <div class="upgrade-stats">Lv.${lv}　⚔ ATK ${atk}${inParty ? "　／　パーティー入り" : ""}<br>次のレベル: ATK ${atk + 3}　／　💰 ${cost}コイン</div>
+    <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-sm ${inParty ? "btn-outline" : "btn-pink"}" style="min-width:120px" onclick="toggleParty('${char.id}')">
+        ${inParty ? "パーティーから外す" : "パーティーに入れる"}
+      </button>
+      <button class="btn btn-gold btn-sm" style="min-width:120px" onclick="upgradeCharacter('${char.id}')" ${state.coins < cost ? "disabled" : ""}>
+        ⬆ 攻撃力を強化
+      </button>
+    </div>`;
+}
+function renderChars() {
+  normalizeParty();
+  renderPartySlots();
+  const grid = document.getElementById("charGrid");
+  grid.innerHTML = CHARACTERS.map(c => {
+    const owned = state.ownedChars.includes(c.id);
+    const selected = state.activeChar === c.id;
+    const inParty = state.party.includes(c.id);
+    const slotNum = inParty ? state.party.indexOf(c.id) + 1 : 0;
+    return `
+      <div class="char-card ${selected ? "selected" : ""} ${inParty ? "in-party" : ""}" style="opacity:${owned ? 1 : 0.4}"
+           onclick="${owned ? `selectCharOrToggle('${c.id}')` : ""}">
+        <div class="emoji">${owned ? c.emoji : "❓"}</div>
+        <div class="name">${owned ? c.name : "???"}</div>
+        <div class="atk">${owned ? "ATK " + getCharAtk(c) : c.rarity}</div>
+        ${owned ? `<div class="level">Lv.${getCharLevel(c.id)}</div>` : ""}
+        ${inParty ? `<div class="party-badge">パーティー ${slotNum}</div>` : ""}
+      </div>
+    `;
+  }).join("");
+  renderUpgradePanel();
+}
+function selectChar(id) {
+  if (!state.ownedChars.includes(id)) return;
+  state.activeChar = id;
+  saveState();
+  renderChars();
+}
+
+/** Quick-add: double-tap same char toggles party membership */
+let _lastCharTap = { id: null, t: 0 };
+function selectCharOrToggle(id) {
+  if (!state.ownedChars.includes(id)) return;
+  const now = Date.now();
+  if (_lastCharTap.id === id && now - _lastCharTap.t < 400) {
+    _lastCharTap = { id: null, t: 0 };
+    toggleParty(id);
+    return;
+  }
+  _lastCharTap = { id, t: now };
+  selectChar(id);
+}
+
+// Prevent accidental scroll/zoom on battle
+document.getElementById("battle").addEventListener("touchmove", function(e) {
+  if (e.target.closest(".quiz-panel") === null) e.preventDefault();
+}, { passive: false });
+
+updateUI();
+// Begin loading the expanded vocabulary in the background.
+ensureWordBanks();
+</script>
+</body>
+</html>
