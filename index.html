@@ -2,411 +2,349 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>PARTY MEMBER ROSTER</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Party Member Roster</title>
 <style>
-  @page {
-    size: A4 portrait;
-    margin: 12mm 10mm;
-    background-color: #0d1117;
+  :root {
+    --bg-color: #0d1117;
+    --card-bg: #161b22;
+    --border-color: #30363d;
+    --text-primary: #c9d1d9;
+    --text-heading: #f0f6fc;
+    --text-muted: #8b949e;
+    --accent-blue: #58a6ff;
   }
-  
+
   *, *::before, *::after {
     box-sizing: border-box;
-  }
-  
-  body {
-    font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
-    background-color: #0d1117;
-    color: #c9d1d9;
     margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-primary);
     padding: 20px;
-    font-size: 10pt;
     line-height: 1.5;
   }
-  
+
+  .app-container {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
   /* Header Section */
   .header {
     text-align: center;
-    padding-bottom: 10px;
-    margin-bottom: 15px;
-    border-bottom: 2px solid #30363d;
+    padding-bottom: 12px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid var(--border-color);
   }
-  
+
   .header h1 {
-    color: #58a6ff;
-    font-size: 20pt;
-    margin: 0 0 4px 0;
+    color: var(--accent-blue);
+    font-size: 1.6rem;
     letter-spacing: 2px;
     text-transform: uppercase;
   }
-  
+
   .header p {
-    color: #8b949e;
-    font-size: 9pt;
-    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-top: 4px;
   }
-  
-  /* Grid Layout via Table */
+
+  /* Grid Layout */
   .party-grid {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 10px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 16px;
   }
-  
-  .party-col {
-    width: 50%;
-    vertical-align: top;
-  }
-  
+
   /* Card Design */
   .card {
-    background-color: #161b22;
-    border: 1px solid #30363d;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
     border-radius: 8px;
-    padding: 12px;
-    margin-bottom: 10px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    padding: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
   }
-  
+
   .card-header {
     border-bottom: 1px solid #21262d;
-    padding-bottom: 6px;
-    margin-bottom: 8px;
+    padding-bottom: 8px;
+    margin-bottom: 12px;
   }
-  
+
   .role-badge {
     display: inline-block;
     padding: 2px 8px;
     border-radius: 4px;
-    font-size: 8pt;
+    font-size: 0.75rem;
     font-weight: bold;
     color: #ffffff;
     text-transform: uppercase;
   }
-  
+
   .badge-bard { background-color: #d97706; }
   .badge-healer { background-color: #059669; }
   .badge-mage { background-color: #7c3aed; }
   .badge-archer { background-color: #2563eb; }
-  
+
   .char-name {
-    font-size: 13pt;
+    font-size: 1.2rem;
     font-weight: bold;
-    color: #f0f6fc;
+    color: var(--text-heading);
     margin-left: 6px;
   }
-  
+
   .char-sub {
-    font-size: 8.5pt;
-    color: #8b949e;
-    margin-top: 2px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 4px;
   }
-  
+
   /* Stats Section */
   .section-label {
-    font-size: 8pt;
+    font-size: 0.75rem;
     font-weight: bold;
-    color: #8b949e;
+    color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 1px;
-    margin-top: 8px;
-    margin-bottom: 4px;
-    border-left: 3px solid #58a6ff;
+    margin-top: 10px;
+    margin-bottom: 6px;
+    border-left: 3px solid var(--accent-blue);
     padding-left: 6px;
   }
-  
+
   .stats-table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
   }
-  
+
   .stats-table td {
-    padding: 2px 4px;
-    font-size: 8.5pt;
+    padding: 3px 0;
+    font-size: 0.85rem;
   }
-  
+
   .stat-name {
-    color: #8b949e;
-    width: 25%;
+    color: var(--text-muted);
+    width: 20%;
   }
-  
+
   .stat-bar-cell {
-    width: 55%;
+    width: 60%;
+    padding: 0 8px;
   }
-  
+
   .stat-bar-bg {
     background-color: #21262d;
-    border-radius: 3px;
+    border-radius: 4px;
     height: 8px;
     width: 100%;
     overflow: hidden;
   }
-  
+
   .stat-bar-fill {
     height: 100%;
-    border-radius: 3px;
+    border-radius: 4px;
+    transition: width 0.4s ease;
   }
-  
+
   .fill-str { background-color: #ef4444; }
   .fill-dex { background-color: #3b82f6; }
   .fill-int { background-color: #a855f7; }
   .fill-mnd { background-color: #10b981; }
   .fill-vit { background-color: #f59e0b; }
-  
+
   .stat-val {
-    color: #f0f6fc;
+    color: var(--text-heading);
     font-weight: bold;
     text-align: right;
     width: 20%;
   }
-  
-  /* Skill Tags */
+
+  /* Skill List */
   .skill-item {
-    font-size: 8.5pt;
+    font-size: 0.8rem;
     background-color: #21262d;
-    border: 1px solid #30363d;
+    border: 1px solid var(--border-color);
     border-radius: 4px;
-    padding: 3px 6px;
-    margin-bottom: 3px;
+    padding: 4px 8px;
+    margin-bottom: 4px;
     color: #e6edf3;
   }
-  
+
   .skill-name {
     font-weight: bold;
-    color: #58a6ff;
+    color: var(--accent-blue);
   }
-  
+
   /* Description */
   .desc-text {
-    font-size: 8.5pt;
-    color: #8b949e;
+    font-size: 0.8rem;
+    color: var(--text-muted);
     background-color: #0d1117;
-    padding: 6px;
+    padding: 8px;
     border-radius: 4px;
-    border: 1px dashed #30363d;
-    margin-top: 6px;
+    border: 1px dashed var(--border-color);
+    margin-top: 8px;
   }
-  
+
   /* Footer */
   .footer {
     text-align: center;
-    margin-top: 15px;
-    padding-top: 8px;
-    border-top: 1px solid #21262d;
-    font-size: 8pt;
+    margin-top: 24px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-color);
+    font-size: 0.75rem;
     color: #484f58;
   }
 </style>
 </head>
 <body>
 
+<div class="app-container">
   <div class="header">
     <h1>PARTY MEMBER ROSTER</h1>
     <p>選定パーティメンバー 仕様書・能力パラメータ一覧</p>
   </div>
 
-  <table class="party-grid">
-    <tr>
-      <!-- Column 1 -->
-      <td class="party-col">
-        
-        <!-- Member 1: Bard -->
-        <div class="card">
-          <div class="card-header">
-            <span class="role-badge badge-bard">SUPPORT / BARD</span>
-            <span class="char-name">リレイ・クレフ</span>
-            <div class="char-sub">7. 吟遊詩人（バード）</div>
-          </div>
-          
-          <div class="section-label">BASE STATS</div>
-          <table class="stats-table">
-            <tr>
-              <td class="stat-name">STR</td>
-              <td class="stat-bar-cell"><div class="stat-bar-bg"><div class="stat-bar-fill fill-str" style="width: 45%;"></div></div></td>
-              <td class="stat-val">45 / C</td>
-            </tr>
-            <tr>
-              <td class="stat-name">DEX</td>
-              <td class="stat-bar-cell"><div class="stat-bar-bg"><div class="stat-bar-fill fill-dex" style="width: 78%;"></div></div></td>
-              <td class="stat-val">78 / A</td>
-            </tr>
-            <tr>
-              <td class="stat-name">INT</td>
-              <td class="stat-bar-cell"><div class="stat-bar-bg"><div class="stat-bar-fill fill-int" style="width: 65%;"></div></div></td>
-              <td class="stat-val">65 / B</td>
-            </tr>
-            <tr>
-              <td class="stat-name">MND</td>
-              <td class="stat-bar-cell"><div class="stat-bar-bg"><div class="stat-bar-fill fill-mnd" style="width: 82%;"></div></div></td>
-              <td class="stat-val">82 / A+</td>
-            </tr>
-            <tr>
-              <td class="stat-name">VIT</td>
-              <td class="stat-bar-cell"><div class="stat-bar-bg"><div class="stat-bar-fill fill-vit" style="width: 50%;"></div></div></td>
-              <td class="stat-val">50 / C+</td>
-            </tr>
-          </table>
-
-          <div class="section-label">SPECIAL ABILITIES</div>
-          <div class="skill-item"><span class="skill-name">【英雄の賛歌】</span> 味方全体の全能力値を15%上昇</div>
-          <div class="skill-item"><span class="skill-name">【安らぎの小夜曲】</span> 毎ターンHP・MPを微回復</div>
-
-          <div class="desc-text">
-            リュートの旋律でパーティ全体を強力にバフ支援するムードメーカー。素早さと精神力に優れ、戦闘のテンポをコントロールする。
-          </div>
-        </div>
-
-        <!-- Member 2: Healer -->
-        <div class="card">
-          <div class="card-header">
-            <span class="role-badge badge-healer">HEALER / CLERIC</span>
-            <span class="char-name">エルリア・フォルス</span>
-            <div class="char-sub">7. 聖導士（ヒーラー／クレリック）</div>
-          </div>
-          
-          <div class="section-label">BASE STATS</div>
-          <table class="stats-table">
-            <tr>
-              <td class="stat-name">STR</td>
-              <td class="stat-bar-cell"><div class="stat-bar-bg"><div class="stat-bar-fill fill-str" style="width: 35%;"></div></div></td>
-              <td class="stat-val">35 / D</td>
-            </tr>
-            <tr>
-              <td class="stat-name">DEX</td>
-              <td class="stat-bar-cell"><div class="stat-bar-bg"><div class="stat-bar-fill fill-dex" style="width: 55%;"></div></div></td>
-              <td class="stat-val">55 / C+</td>
-            </tr>
-            <tr>
-              <td class="stat-name">INT</td>
-              <td class="stat-bar-cell"><div class="stat-bar-bg"><div class="stat-bar-fill fill-int" style="width: 75%;"></div></div></td>
-              <td class="stat-val">75 / A</td>
-            </tr>
-            <tr>
-              <td class="stat-name">MND</td>
-              <td class="stat-bar-cell"><div class="stat-bar-bg"><div class="stat-bar-fill fill-mnd" style="width: 98%;"></div></div></td>
-              <td class="stat-val">98 / S</td>
-            </tr>
-            <tr>
-              <td class="stat-name">VIT</td>
-              <td class="stat-bar-cell"><div class="stat-bar-bg"><div class="stat-bar-fill fill-vit" style="width: 60%;"></div></div></td>
-              <td class="stat-val">60 / B</td>
-            </tr>
-          </table>
-
-          <div class="section-label">SPECIAL ABILITIES</div>
-          <div class="skill-item"><span class="skill-name">【聖光域（エリアヒール）】</span> 全体のHPを大回復＋状態異常解除</div>
-          <div class="skill-item"><span class="skill-name">【神聖の護符】</span> 致死ダメージを1回だけ防ぐバリア</div>
-
-          <div class="desc-text">
-            圧倒的な回復魔法と浄化の力を誇るパーティの生命線。高い精神力（MND）を誇り、どんな窮地からも味方を蘇らせる。
-          </div>
-        </div>
-
-      </td>
-
-      <!-- Column 2 -->
-      <td class="party-col">
-        
-        <!-- Member 3: Mage -->
-        <div class="card">
-          <div class="card-header">
-            <span class="role-badge badge-mage">DPS / MAGE</span>
-            <span class="char-name">シルフ・ヴァルハイト</span>
-            <div class="char-sub">3. 銀髪の魔導士</div>
-          </div>
-          
-          <div class="section-label">BASE STATS</div>
-          <table class="stats-table">
-            <tr>
-              <td class="stat-name">STR</td>
-              <td class="stat-bar-cell"><div class="stat-bar-bg"><div class="stat-bar-fill fill-str" style="width: 30%;"></div></div></td>
-              <td class="stat-val">30 / D</td>
-            </tr>
-            <tr>
-              <td class="stat-name">DEX</td>
-              <td class="stat-bar-cell"><div class="stat-bar-bg"><div class="stat-bar-fill fill-dex" style="width: 68%;"></div></div></td>
-              <td class="stat-val">68 / B+</td>
-            </tr>
-            <tr>
-              <td class="stat-name">INT</td>
-              <td class="stat-bar-cell"><div class="stat-bar-bg"><div class="stat-bar-fill fill-int" style="width: 99%;"></div></div></td>
-              <td class="stat-val">99 / S+</td>
-            </tr>
-            <tr>
-              <td class="stat-name">MND</td>
-              <td class="stat-bar-cell"><div class="stat-bar-bg"><div class="stat-bar-fill fill-mnd" style="width: 70%;"></div></div></td>
-              <td class="stat-val">70 / B+</td>
-            </tr>
-            <tr>
-              <td class="stat-name">VIT</td>
-              <td class="stat-bar-cell"><div class="stat-bar-bg"><div class="stat-bar-fill fill-vit" style="width: 40%;"></div></div></td>
-              <td class="stat-val">40 / D+</td>
-            </tr>
-          </table>
-
-          <div class="section-label">SPECIAL ABILITIES</div>
-          <div class="skill-item"><span class="skill-name">【星崩領域（メテオフォール）】</span> 広範囲超高威力の無属性古代魔法</div>
-          <div class="skill-item"><span class="skill-name">【詠唱破棄】</span> 低〜中級魔法の即時発動</div>
-
-          <div class="desc-text">
-            圧倒的な魔力（INT）を誇る広範囲アタッカー。銀髪に秘められた古代の知識で、群がる敵を強力な魔法攻撃で一網打尽にする。
-          </div>
-        </div>
-
-        <!-- Member 4: Archer -->
-        <div class="card">
-          <div class="card-header">
-            <span class="role-badge badge-archer">DPS / ARCHER</span>
-            <span class="char-name">ファレン・ルミナス</span>
-            <div class="char-sub">2. 金髪エルフの弓使い</div>
-          </div>
-          
-          <div class="section-label">BASE STATS</div>
-          <table class="stats-table">
-            <tr>
-              <td class="stat-name">STR</td>
-              <td class="stat-bar-cell"><div class="stat-bar-bg"><div class="stat-bar-fill fill-str" style="width: 65%;"></div></div></td>
-              <td class="stat-val">65 / B</td>
-            </tr>
-            <tr>
-              <td class="stat-name">DEX</td>
-              <td class="stat-bar-cell"><div class="stat-bar-bg"><div class="stat-bar-fill fill-dex" style="width: 96%;"></div></div></td>
-              <td class="stat-val">96 / S</td>
-            </tr>
-            <tr>
-              <td class="stat-name">INT</td>
-              <td class="stat-bar-cell"><div class="stat-bar-bg"><div class="stat-bar-fill fill-int" style="width: 60%;"></div></div></td>
-              <td class="stat-val">60 / B</td>
-            </tr>
-            <tr>
-              <td class="stat-name">MND</td>
-              <td class="stat-bar-cell"><div class="stat-bar-bg"><div class="stat-bar-fill fill-mnd" style="width: 58%;"></div></div></td>
-              <td class="stat-val">58 / C+</td>
-            </tr>
-            <tr>
-              <td class="stat-name">VIT</td>
-              <td class="stat-bar-cell"><div class="stat-bar-bg"><div class="stat-bar-fill fill-vit" style="width: 55%;"></div></div></td>
-              <td class="stat-val">55 / C+</td>
-            </tr>
-          </table>
-
-          <div class="section-label">SPECIAL ABILITIES</div>
-          <div class="skill-item"><span class="skill-name">【精霊の一矢】</span> 弱点属性を突く必中の精密狙撃</div>
-          <div class="skill-item"><span class="skill-name">【疾風歩法】</span> 回避率大幅上昇＆先制攻撃確率UP</div>
-
-          <div class="desc-text">
-            卓越した器用さ（DEX）と遠距離精密射撃を誇る物理アタッカー。エルフ特有の鋭い感性で敵の急所を的確に射抜く。
-          </div>
-        </div>
-
-      </td>
-    </tr>
-  </table>
+  <div class="party-grid" id="partyContainer">
+    <!-- JavaScriptによって動的にキャラクターカードがレンダリングされます -->
+  </div>
 
   <div class="footer">
     CONFIDENTIAL - PARTY SYSTEM STATUS SPECIFICATION ARCHIVE
   </div>
+</div>
 
+<script>
+  // 実装データ定義
+  const partyData = [
+    {
+      roleBadgeClass: "badge-bard",
+      roleBadgeText: "SUPPORT / BARD",
+      name: "リレイ・クレフ",
+      subTitle: "7. 吟遊詩人（バード）",
+      stats: [
+        { name: "STR", val: "45 / C", pct: 45, type: "fill-str" },
+        { name: "DEX", val: "78 / A", pct: 78, type: "fill-dex" },
+        { name: "INT", val: "65 / B", pct: 65, type: "fill-int" },
+        { name: "MND", val: "82 / A+", pct: 82, type: "fill-mnd" },
+        { name: "VIT", val: "50 / C+", pct: 50, type: "fill-vit" }
+      ],
+      skills: [
+        { name: "【英雄の賛歌】", desc: "味方全体の全能力値を15%上昇" },
+        { name: "【安らぎの小夜曲】", desc: "毎ターンHP・MPを微回復" }
+      ],
+      description: "リュートの旋律でパーティ全体を強力にバフ支援するムードメーカー。素早さと精神力に優れ、戦闘のテンポをコントロールする。"
+    },
+    {
+      roleBadgeClass: "badge-healer",
+      roleBadgeText: "HEALER / CLERIC",
+      name: "エルリア・フォルス",
+      subTitle: "7. 聖導士（ヒーラー／クレリック）",
+      stats: [
+        { name: "STR", val: "35 / D", pct: 35, type: "fill-str" },
+        { name: "DEX", val: "55 / C+", pct: 55, type: "fill-dex" },
+        { name: "INT", val: "75 / A", pct: 75, type: "fill-int" },
+        { name: "MND", val: "98 / S", pct: 98, type: "fill-mnd" },
+        { name: "VIT", val: "60 / B", pct: 60, type: "fill-vit" }
+      ],
+      skills: [
+        { name: "【聖光域（エリアヒール）】", desc: "全体のHPを大回復＋状態異常解除" },
+        { name: "【神聖の護符】", desc: "致死ダメージを1回だけ防ぐバリア" }
+      ],
+      description: "圧倒的な回復魔法と浄化の力を誇るパーティの生命線。高い精神力（MND）を誇り、どんな窮地からも味方を蘇らせる。"
+    },
+    {
+      roleBadgeClass: "badge-mage",
+      roleBadgeText: "DPS / MAGE",
+      name: "シルフ・ヴァルハイト",
+      subTitle: "3. 銀髪の魔導士",
+      stats: [
+        { name: "STR", val: "30 / D", pct: 30, type: "fill-str" },
+        { name: "DEX", val: "68 / B+", pct: 68, type: "fill-dex" },
+        { name: "INT", val: "99 / S+", pct: 99, type: "fill-int" },
+        { name: "MND", val: "70 / B+", pct: 70, type: "fill-mnd" },
+        { name: "VIT", val: "40 / D+", pct: 40, type: "fill-vit" }
+      ],
+      skills: [
+        { name: "【星崩領域（メテオフォール）】", desc: "広範囲超高威力の無属性古代魔法" },
+        { name: "【詠唱破棄】", desc: "低〜中級魔法の即時発動" }
+      ],
+      description: "圧倒的な魔力（INT）を誇る広範囲アタッカー。銀髪に秘められた古代の知識で、群がる敵を強力な魔法攻撃で一網打尽にする。"
+    },
+    {
+      roleBadgeClass: "badge-archer",
+      roleBadgeText: "DPS / ARCHER",
+      name: "ファレン・ルミナス",
+      subTitle: "2. 金髪エルフの弓使い",
+      stats: [
+        { name: "STR", val: "65 / B", pct: 65, type: "fill-str" },
+        { name: "DEX", val: "96 / S", pct: 96, type: "fill-dex" },
+        { name: "INT", val: "60 / B", pct: 60, type: "fill-int" },
+        { name: "MND", val: "58 / C+", pct: 58, type: "fill-mnd" },
+        { name: "VIT", val: "55 / C+", pct: 55, type: "fill-vit" }
+      ],
+      skills: [
+        { name: "【精霊の一矢】", desc: "弱点属性を突く必中の精密狙撃" },
+        { name: "【疾風歩法】", desc: "回避率大幅上昇＆先制攻撃確率UP" }
+      ],
+      description: "卓越した器用さ（DEX）と遠距離精密射撃を誇る物理アタッカー。エルフ特有の鋭い感性で敵の急所を的確に射抜く。"
+    }
+  ];
+
+  // レンダリングロジック
+  function renderParty() {
+    const container = document.getElementById('partyContainer');
+    container.innerHTML = partyData.map(char => `
+      <div class="card">
+        <div>
+          <div class="card-header">
+            <span class="role-badge ${char.roleBadgeClass}">${char.roleBadgeText}</span>
+            <span class="char-name">${char.name}</span>
+            <div class="char-sub">${char.subTitle}</div>
+          </div>
+          
+          <div class="section-label">BASE STATS</div>
+          <table class="stats-table">
+            ${char.stats.map(s => `
+              <tr>
+                <td class="stat-name">${s.name}</td>
+                <td class="stat-bar-cell">
+                  <div class="stat-bar-bg">
+                    <div class="stat-bar-fill ${s.type}" style="width: ${s.pct}%;"></div>
+                  </div>
+                </td>
+                <td class="stat-val">${s.val}</td>
+              </tr>
+            `).join('')}
+          </table>
+
+          <div class="section-label">SPECIAL ABILITIES</div>
+          ${char.skills.map(sk => `
+            <div class="skill-item">
+              <span class="skill-name">${sk.name}</span> ${sk.desc}
+            </div>
+          `).join('')}
+        </div>
+
+        <div class="desc-text">
+          ${char.description}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // 初期化実行
+  document.addEventListener('DOMContentLoaded', renderParty);
+</script>
 </body>
 </html>
