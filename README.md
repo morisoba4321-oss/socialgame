@@ -1,53 +1,71 @@
-# 英検タワーディフェンス — 完全無料版（AI課金なし）
+# 英検タワーディフェンス — 完全無料版（Gemini API）
 
-iPhoneのSafari/PWAで動かすことを前提にした、単語学習ゲームです。
-**APIキーは一切不要**で、静的ファイルだけで動作します。
+iPhoneのSafari/PWAで動かすことを前提にした単語学習ゲームです。
+課金は一切不要。Google AI StudioのGemini APIの**無料枠**（クレジットカード登録不要）を使います。
 
 ## 構成
 
 - `index.html` — 画面
 - `styles.css` — スタイル
 - `app.js` — ゲーム本体
-- `sentence-engine.js` — 例文の品詞・文法チェック（オフライン、API不使用）
+- `sentence-engine.js` — AI例文生成の呼び出し・検証・IndexedDBキャッシュ
+- `api/generate-example.js` — Vercel Function。Gemini APIをサーバー側から呼び出す
 - `sw.js` — PWA用Service Worker
 - `manifest.webmanifest` — ホーム画面追加用
+- `vercel.json` — Vercel Function設定
+- `.env.example` — 必要な環境変数の見本
 
 ## 例文の取得の流れ（すべて無料）
 
 1. 手動で確認済みの安全な例文（`SAFE_PATTERNS`）があればそれを使う
 2. 単語データに付属する例文（`exampleFromSeed`）があればそれを使う
-3. **Tatoeba**（多言語例文コーパス、無料公開API）と
-   **Free Dictionary API**（`dictionaryapi.dev`、無料公開API）に問い合わせ、
-   人間が実際に書いた自然な例文を取得する
-4. 見つからない場合のみ、意味カテゴリごとに用意したローカルテンプレート
-   （`buildLocalContextExample`）を使う
-5. それも無ければ、品詞ベースの汎用テンプレート
-   （`buildAIStyleExample`）を最終手段として使う
+3. **Tatoeba**（多言語例文コーパス）と**Free Dictionary API**
+   （どちらも無料公開API・レート制限なし）に問い合わせ、
+   人間が実際に書いた自然な例文を探す
+4. 見つからなければ `/api/generate-example` 経由でGemini API（無料枠）に
+   生成させる。無料枠のレート制限（1分・1日あたりの上限）に達した場合は
+   自動的に次のステップへフォールバックする
+5. それでも無ければ、意味カテゴリごとに用意したローカルテンプレート
+6. 最後の手段として、品詞ベースの汎用テンプレート
 
-3の人間が書いた実例文を最優先にすることで、無料のままでも
-「機械的で不自然な文」が出る頻度を大きく減らしています。
-取得したすべての例文は、対象の単語が正しい品詞・文法枠で
-使われているか（`sentence-engine.js`の`grammarCompatible`）を
-必ずチェックしてから出題されます。
+すべての例文は、対象の単語が正しい品詞・文法枠で使われているかを
+`sentence-engine.js`の`grammarCompatible`で必ずチェックしてから出題されます。
 
-## デプロイ
+## Vercelへのデプロイ
 
-サーバー側の処理（Vercel Function、環境変数）は不要になりました。
-このフォルダをそのまま、以下のような無料の静的ホスティングに置くだけで動きます。
+### 1. GitHubへ配置
 
-- Vercel（Static/Other プロジェクトとしてImport。Build Command不要）
-- GitHub Pages
-- Netlify（Drag & Dropでも可）
-- Cloudflare Pages
+このフォルダをGitHubリポジトリのルートに置き、VercelでImportしてください。
+ビルド設定は基本的に不要です。
+
+### 2. 無料のGemini APIキーを取得
+
+1. [Google AI Studio](https://aistudio.google.com/apikey) にGoogleアカウントでログイン
+2. 「Get API key」→「Create API key」でキーを発行（クレジットカード不要）
+
+### 3. 環境変数を設定
+
+Vercelの **Project → Settings → Environment Variables** で次を追加します。
+
+- `GEMINI_API_KEY` — 手順2で発行したキー（必須）
+- `GEMINI_MODEL` — 任意。未設定なら `gemini-flash-lite-latest`
+
+Production・Preview・Developmentそれぞれに設定し、追加・変更後は再デプロイしてください。
+
+### 4. 動作確認
+
+デプロイ後、ブラウザから通常どおりゲームを開きます。
+ブラウザからGoogleへ直接接続せず、`/api/generate-example` 経由でAIを呼び出します。
+Vercelの Functions ログで200または429（無料枠のレート制限。異常ではない）
+が返っているか確認してください。
+
+## 無料枠についての注意
+
+- Gemini APIの無料枠はクレジットカード不要ですが、**1分・1日あたりのリクエスト数に上限**があります。上限に達しても課金はされず、単にステップ5・6のローカルテンプレートに自動的に切り替わります。
+- Googleの利用規約上、無料枠では入力・出力がモデル改善に使われる場合があります。個人の学習用途であれば通常は問題ありませんが、気になる場合は確認してください。
+- `GEMINI_API_KEY`は絶対にブラウザ側コードに書かないでください。`api/generate-example.js`内だけで`process.env.GEMINI_API_KEY`として使用します。
 
 ## iPhone
 
-HTTPSで公開したURLをSafariで開き、共有メニューから
+HTTPSで公開したVercel URLをSafariで開き、共有メニューから
 「ホーム画面に追加」を選ぶとPWAとして起動できます。
-
-## 注意
-
-Tatoeba・Free Dictionary APIはどちらも無料の公開APIですが、
-外部サービスであるため利用規約の範囲内でご利用ください。
-ネットワークが使えない環境では自動的にローカルテンプレートに
-切り替わるため、オフラインでもゲーム自体は継続できます。
