@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta name="theme-color" content="#111827">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.webmanifest">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Word Guard">
+<meta name="theme-color" content="#0b0e17">
+<meta name="format-detection" content="telephone=no">
+<title>英検タワーディフェンス - Word Guard</title>
+
+<!-- Character portraits are embedded as AI-generated JPEG data URLs for single-file/offline portability. -->
+
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="app-loading-screen" aria-label="アプリ読み込み中">
+  <div class="loading-panel">
+    <div class="loading-title">英検タワーディフェンス</div>
+    <div class="loading-subtitle">ゲームを準備しています…</div>
+    <div class="loading-percent" id="loading-percent">0%</div>
+    <div class="loading-bar">
+      <div class="loading-bar-fill" id="loading-bar-fill"></div>
+    </div>
+    <div class="loading-status" id="loading-status">初期化しています…</div>
+  </div>
+</div>
+
+
+
+
+<!-- MENU -->
+<div id="menu" class="screen active">
+  <header>
+    <div class="logo">⚔ Word Guard</div>
+    <div class="stats">
+      <div class="stat">💰 <span id="coinDisplay">0</span></div>
+    </div>
+  </header>
+  <div class="hero">
+    <h1>英検タワーディフェンス</h1>
+    <p>正解して敵を撃退！苦手単語を克服しよう</p>
+  </div>
+  <div class="level-box">
+    <label>難易度（出題単語のみ変化）</label>
+    <select id="levelSelect">
+      <option value="3">英検3級</option>
+      <option value="pre2">英検準2級</option>
+      <option value="2">英検2級</option>
+      <option value="pre1">英検準1級</option>
+      <option value="1">英検1級</option>
+    </select>
+  </div>
+  <div class="level-box" id="menuPartyPreview" style="margin-top:-6px;">
+    <label>バトルパーティー</label>
+    <div id="menuPartyLine" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:0.95rem;">
+      <span style="color:var(--muted);">読み込み中…</span>
+    </div>
+  </div>
+  <div class="menu-grid">
+    <button class="btn" onclick="startBattle()">バトル開始</button>
+    <button class="btn btn-pink" onclick="showScreen('zukan')">図鑑（苦手）</button>
+    <button class="btn btn-gold" onclick="showScreen('gacha')">ガチャ</button>
+    <button class="btn btn-outline" onclick="showScreen('chars')">仲間キャラ</button>
+    <button class="btn btn-outline" onclick="showScreen('history')">📜 バトル履歴</button>
+  </div>
+</div>
+
+<!-- BATTLE HISTORY -->
+<div id="history" class="screen">
+  <header>
+    <div class="logo">📜 バトル履歴</div>
+    <button class="btn btn-sm btn-outline" onclick="showScreen('menu')">戻る</button>
+  </header>
+  <div class="history-level-tabs" id="historyLevelTabs" role="tablist" aria-label="級フィルター">
+    <button type="button" class="hist-tab active" data-level="all" onclick="setHistoryLevelFilter('all')">すべて</button>
+    <button type="button" class="hist-tab" data-level="3" onclick="setHistoryLevelFilter('3')">3級</button>
+    <button type="button" class="hist-tab" data-level="pre2" onclick="setHistoryLevelFilter('pre2')">準2級</button>
+    <button type="button" class="hist-tab" data-level="2" onclick="setHistoryLevelFilter('2')">2級</button>
+    <button type="button" class="hist-tab" data-level="pre1" onclick="setHistoryLevelFilter('pre1')">準1級</button>
+    <button type="button" class="hist-tab" data-level="1" onclick="setHistoryLevelFilter('1')">1級</button>
+  </div>
+  <div id="historySummary" style="text-align:center;color:var(--muted);font-size:.88rem;margin:8px 0 8px;"></div>
+  <div style="text-align:center;margin-bottom:10px;"><button class="btn btn-sm btn-outline" onclick="clearBattleHistory()">履歴をすべて消去</button></div>
+  <div id="battleHistoryList" style="overflow:auto;flex:1;min-height:0;padding-bottom:20px;"></div>
+</div>
+
+<!-- BATTLE -->
+<div id="battle" class="screen">
+  <div class="battle-top">
+    <div class="battle-top-left">
+      <button class="btn btn-sm btn-outline" onclick="endBattle()">撤退</button>
+      <button class="btn btn-sm btn-outline btn-pause" id="pauseBtn" onclick="toggleBattlePause()">⏸ 一時停止</button>
+    </div>
+    <div class="wave-info">WAVE <span id="waveNum">1</span><span id="waveTotal">/300</span> <small id="waveProgress"></small></div>
+    <div class="stats">
+      <div class="stat">💰 <span id="battleCoin">0</span></div>
+    </div>
+  </div>
+  <div class="field" id="field">
+    <div class="base" id="base">🏰</div>
+    <div class="battle-party" id="battleParty"></div>
+    <div class="base-hp">HP <span id="baseHp">100</span></div>
+    <div class="pause-overlay" id="pauseOverlay">
+      <div class="pause-title">⏸ 一時停止中</div>
+      <div class="pause-hint">敵の進行と出題操作を停止しています</div>
+      <button class="btn btn-gold" onclick="toggleBattlePause()">▶ 再開する</button>
+    </div>
+  </div>
+  <div class="combo-display" id="comboDisplay"></div>
+  <div class="sp-gauge-wrap" id="spGaugeWrap" title="攻撃するたびに必殺ゲージが溜まります">
+    <span class="sp-gauge-label">⚡ 必殺</span>
+    <div class="sp-gauge-bar"><div class="sp-gauge-fill" id="spGaugeFill"></div></div>
+    <span class="sp-gauge-pct" id="spGaugePct">0%</span>
+  </div>
+  <div class="quiz-panel" id="quizPanel">
+    <div class="quiz-type" id="quizType"></div>
+    <div class="quiz-word" id="quizWord"></div>
+    <button class="speak-btn" id="speakBtn" type="button" style="display:none;" aria-hidden="true">🔊 発音を聞く</button>
+    <div class="quiz-sentence" id="quizSentence"></div>
+    <div class="choices" id="choices"></div>
+    <div class="result-msg" id="resultMsg"></div>
+  </div>
+</div>
+
+<!-- ZUKAN -->
+<div id="zukan" class="screen">
+  <header>
+    <div class="logo">📖 苦手単語図鑑</div>
+    <button class="btn btn-sm btn-outline" onclick="showScreen('menu')">戻る</button>
+  </header>
+  <p style="text-align:center;color:var(--muted);margin-bottom:14px;font-size:0.88rem;flex-shrink:0;">
+    間違えた単語が自動でストックされます。<br>覚えたら「卒業」しましょう。
+  </p>
+  <p style="text-align:center;color:var(--muted);font-size:0.72rem;margin:-6px 0 10px;">例文: シード → Tatoeba → 英英辞典 → ローカル文脈フォールバック</p>
+  <div class="list" id="zukanList"></div>
+</div>
+
+<!-- GACHA -->
+<div id="gacha" class="screen">
+  <header>
+    <div class="logo">🎰 ガチャ</div>
+    <button class="btn btn-sm btn-outline" onclick="showScreen('menu')">戻る</button>
+  </header>
+  <div class="gacha-area">
+    <p style="color:var(--muted);margin-bottom:6px;">所持コイン: <span id="gachaCoin" style="color:var(--gold);font-weight:700;">0</span></p>
+    <p style="font-size:0.88rem;color:var(--muted);margin-bottom:14px;">1回 100コイン　／　10連 1000コイン<br>SSR 3%　SR 17%　R 30%　N 50%</p>
+    <div class="gacha-btns">
+      <button class="btn btn-gold" id="gachaBtn" onclick="doGacha(1)">ガチャを1回引く（100）</button>
+      <button class="btn btn-gold" id="gachaBtn10" onclick="doGacha(10)" style="background:linear-gradient(135deg,#f59e0b,#ef4444);">🎰 10連ガチャ（1000）</button>
+    </div>
+    <div class="gacha-result" id="gachaResult"></div>
+  </div>
+</div>
+
+<!-- CHARS -->
+<div id="chars" class="screen">
+  <header>
+    <div class="logo">👥 仲間キャラ</div>
+    <button class="btn btn-sm btn-outline" onclick="showScreen('menu')">戻る</button>
+  </header>
+  <p style="text-align:center;color:var(--muted);margin-bottom:10px;font-size:0.88rem;flex-shrink:0;">
+    最大3人まで編成。攻撃力は合計でバトルに反映されます。<br>
+    <span style="font-size:0.8rem;">下のキャラを選ぶ →「パーティーに入れる」／スロットをタップで外す</span>
+  </p>
+  <div id="growthSummary"></div>
+  <div class="party-panel" id="partyPanel">
+    <h3>⚔ バトルパーティー</h3>
+    <div class="party-slots" id="partySlots"></div>
+    <div class="party-total" id="partyTotal">合計 ATK <span>0</span></div>
+  </div>
+  <div class="upgrade-panel" id="upgradePanel">
+    キャラクターを選択すると育成・編成できます。
+  </div>
+  <div class="char-grid" id="charGrid"></div>
+</div>
+
+<!-- Card material enhancement modal -->
+<div class="profile-modal" id="materialModal" onclick="if(event.target===this)closeMaterialEnhancement()">
+  <div class="profile-card" id="materialCard" style="max-width:560px;"></div>
+</div>
+
+<!-- Modal -->
+<div class="modal" id="modal">
+  <div class="modal-content">
+    <h2 id="modalTitle"></h2>
+    <p id="modalBody"></p>
+    <button class="btn" style="width:100%;" onclick="closeModal()">OK</button>
+  </div>
+</div>
+
+<!-- Character profile lightbox -->
+<div class="profile-modal" id="profileModal" onclick="if(event.target===this)closeCharProfile()">
+  <div class="profile-card" id="profileCard"></div>
+</div>
+
+
+
+
+
+  <script src="sentence-engine.js" defer></script>
+  <script src="app.js" defer></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+    }
+  </script>
+</body>
+</html>
