@@ -1,28 +1,28 @@
-# 英検タワーディフェンス — 完全無料版（Gemini API / Cloudflare Pages）
+# 英検タワーディフェンス — 完全無料版（Gemini API / Cloudflare Workers）
 
 iPhoneのSafari/PWAで動かすことを前提にした単語学習ゲームです。
 課金は一切不要。Google AI StudioのGemini APIの**無料枠**（クレジットカード登録不要）を使います。
-サーバー処理はCloudflare Pages Functionsで動かします。
+
+このプロジェクトはCloudflareの**Workers（static assets付き）**として構成されています。
+Cloudflare Pages（`functions/`フォルダ方式）ではないので注意してください。
+2026年時点でCloudflareは新規プロジェクトをこの統合Workers方式に誘導しており、
+ダッシュボードのURLが`*.pages.dev`ではなく`*.workers.dev`になっているのはこのためです。
 
 ## 構成
 
-- `index.html` — 画面
-- `styles.css` — スタイル
-- `app.js` — ゲーム本体
-- `sentence-engine.js` — AI例文生成の呼び出し・検証・IndexedDBキャッシュ
-- `functions/api/generate-example.js` — Cloudflare Pages Function。
-  Gemini APIをサーバー側から呼び出す（パスがそのままルートになるので、
-  このファイルは `/api/generate-example` として呼び出される）
-- `sw.js` — PWA用Service Worker
-- `manifest.webmanifest` — ホーム画面追加用
-- `.env.example` — 必要な環境変数の見本
-
-> ⚠️ Cloudflare PagesとVercelはサーバー関数の書き方が異なります。
-> Vercelは `api/*.js` に `export default function handler(req, res)`、
-> Cloudflareは `functions/*.js` に `export function onRequestPost(context)`
-> という形式が必要です。フォルダを間違えると（`api/`のままだと）
-> Cloudflareでは関数が一切呼ばれず、常にローカルテンプレートの
-> 不自然な文にフォールバックしてしまうので注意してください。
+- `wrangler.json` — Workers設定。`main`（Workerスクリプト）と
+  `assets.directory`（静的ファイルの場所）を指定
+- `worker.js` — Workerのエントリーポイント。`/api/generate-example`への
+  リクエストだけをGemini API呼び出しとして処理し、それ以外は
+  `env.ASSETS.fetch(request)`で`public/`内の静的ファイルをそのまま返す
+- `public/` — 静的ファイル一式
+  - `index.html` — 画面
+  - `styles.css` — スタイル
+  - `app.js` — ゲーム本体
+  - `sentence-engine.js` — AI例文生成の呼び出し・検証・IndexedDBキャッシュ
+  - `sw.js` — PWA用Service Worker
+  - `manifest.webmanifest` — ホーム画面追加用
+- `.env.example` — 必要な環境変数（Secret）の見本
 
 ## 例文の取得の流れ（すべて無料）
 
@@ -38,52 +38,44 @@ iPhoneのSafari/PWAで動かすことを前提にした単語学習ゲームで�
 6. 最後の手段として、品詞ベースの汎用テンプレート
 
 すべての例文は、対象の単語が正しい品詞・文法枠で使われているかを
-`sentence-engine.js`の`grammarCompatible`で必ずチェックしてから出題されます。
+`public/sentence-engine.js`の`grammarCompatible`で必ずチェックしてから出題されます。
 
-## Cloudflare Pagesへのデプロイ
+## デプロイ（Git連携 / Workers Builds）
 
-### 1. GitHubへ配置
+すでにGitHubリポジトリをCloudflareに接続している場合、この構成一式を
+リポジトリのルートに置いて`git push`するだけで、Cloudflareが
+`wrangler.json`を検出し、自動的にビルド・デプロイします。
+特別なBuild commandの設定は不要です。
 
-このフォルダをGitHubリポジトリのルートに置き、Cloudflare Pagesで
-「Workers & Pages → Create → Pages → Connect to Git」からImportしてください。
+### 環境変数（Secret）の設定
 
-- Build command: 空欄のまま（静的サイトなのでビルド不要）
-- Build output directory: `/`（リポジトリのルート）
+1. Cloudflareダッシュボードで対象のWorkersプロジェクトを開く
+2. **Settings → Variables and Secrets** を開く
+3. 次を追加：
+   - `GEMINI_API_KEY` — [Google AI Studio](https://aistudio.google.com/apikey)
+     で発行した無料APIキー（**Secret**として保存推奨）
+   - `GEMINI_MODEL` — 任意。未設定なら`gemini-flash-lite-latest`
+4. 保存後、再デプロイ（Git pushするか、ダッシュボードから再デプロイ）
 
-`functions/`フォルダは自動的に検出され、Pages Functionsとしてデプロイされます。
+### 動作確認
 
-### 2. 無料のGemini APIキーを取得
+デプロイ後、ダッシュボードでプロジェクトを開き、**Logs**（または
+Deploymentの詳細画面）でリアルタイムログを見ながらアプリを操作すると、
+`/api/generate-example`へのリクエストと、その応答ステータスが確認できます。
 
-1. [Google AI Studio](https://aistudio.google.com/apikey) にGoogleアカウントでログイン
-2. 「Get API key」→「Create API key」でキーを発行（クレジットカード不要）
-
-### 3. 環境変数を設定
-
-CloudflareのダッシュボードでプロジェクトのSettings →
-**Environment variables**（Production / Preview それぞれ）で次を追加します。
-
-- `GEMINI_API_KEY` — 手順2で発行したキー（必須）。
-  「Encrypt」にチェックを入れてSecretとして保存することを推奨します。
-- `GEMINI_MODEL` — 任意。未設定なら `gemini-flash-lite-latest`
-
-環境変数を追加・変更した後は再デプロイ（Retry deployment）してください。
-
-### 4. 動作確認
-
-デプロイ後、ブラウザから通常どおりゲームを開きます。
-Cloudflareダッシュボードの当該デプロイ → **Functions** タブのログで、
-`/api/generate-example` が200または429（無料枠のレート制限。異常ではない）
-を返しているか確認してください。500番台のエラーが出る場合は、
-`functions/api/generate-example.js` が正しく配置されているか、
-環境変数名が`GEMINI_API_KEY`になっているかを確認してください。
+- 200 → Gemini生成成功
+- 429 → 無料枠のレート制限（想定内。テンプレートに自動フォールバック）
+- 503 → `GEMINI_API_KEY`が未設定
+- 502 → Gemini側のエラーやタイムアウト
 
 ## 無料枠についての注意
 
-- Gemini APIの無料枠はクレジットカード不要ですが、**1分・1日あたりのリクエスト数に上限**があります。上限に達しても課金はされず、単にステップ5・6のローカルテンプレートに自動的に切り替わります。
+- Gemini APIの無料枠はクレジットカード不要ですが、**1分・1日あたりのリクエスト数に上限**があります。上限に達しても課金はされず、単にローカルテンプレートに自動的に切り替わります。
 - Googleの利用規約上、無料枠では入力・出力がモデル改善に使われる場合があります。個人の学習用途であれば通常は問題ありませんが、気になる場合は確認してください。
-- `GEMINI_API_KEY`は絶対にブラウザ側コードに書かないでください。`functions/api/generate-example.js`内だけで`env.GEMINI_API_KEY`として使用します。
+- `GEMINI_API_KEY`は絶対にブラウザ側コードに書かないでください。`worker.js`内だけで`env.GEMINI_API_KEY`として使用します。
 
 ## iPhone
 
-HTTPSで公開したCloudflare Pages URLをSafariで開き、共有メニューから
-「ホーム画面に追加」を選ぶとPWAとして起動できます。
+HTTPSで公開されたWorkers URL（`*.workers.dev`または独自ドメイン）を
+Safariで開き、共有メニューから「ホーム画面に追加」を選ぶとPWAとして
+起動できます。
